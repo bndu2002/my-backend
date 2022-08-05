@@ -1,10 +1,19 @@
 const express = require('express');
-const abc = require('../introduction/intro')
+const abc = require('../introduction/intro');
+const van =require('../logger/logger.js');
+const sha = require('../util/helper.js');
+const bnd = require('../validator/formatter.js')
 const router = express.Router();
 
 router.get('/test-me', function (req, res) {
     console.log('My batch is', abc.name)
-    abc.printName()
+    console.log(van.welcome())
+    console.log(`${sha.printDate()} ${sha.printMonth()} ${sha.getBatchInfo()}`)
+    console.log(bnd.ran.trim())
+    console.log(bnd.ran.toUpperCase())
+    console.log(bnd.ran.toLowerCase())
+        abc.printName() 
+
     res.send('My second ever api!')
 });
 
