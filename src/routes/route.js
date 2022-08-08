@@ -32,7 +32,57 @@ router.get('/student-details/:name', function(req, res){
     let studentName = requestParams.name
     console.log('Name of the student is ', studentName)
     
-    res.send('Dummy response')
+    res.send('dummy response')
 })
+
+router.get('/movies',function(req,res){
+    let films = ["3 idiots","tare zameen pr","bajarangi 2"]
+    res.send(films)
+})
+
+
+router.get('/movies/:num',function(req,res){
+    let pictures = ["pk","ravan","timestory","double attack"]
+    
+    let bring = req.params.num
+    
+        let see = pictures[bring]
+    if(bring = see){
+        res.send(see)
+    }else{ res.send("use a valid index number")}
+
+
+})
+
+router.get('/films',function(req,res){
+    let movName = [
+        { id : 1 , name : "krish"},
+        { id : 2 , name : "superman"},
+        { id : 3 , name : "batman"},
+        { id : 4 , name : "flying jatt"},
+
+    ]
+    res.send(movName)
+})
+
+ router.get('/films/:filmId',function(req,res){
+    let movies = [
+        { id : 1 , name : "krish"},
+        { id : 2 , name : "superman"},
+        { id : 3 , name : "batman"},
+        { id : 4 , name : "flying jatt"},
+
+    ]
+    let contain = req.params.filmId
+   
+    
+    
+   
+   
+ })
+
+    
+    
+
 
 module.exports = router;
