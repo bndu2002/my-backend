@@ -44,12 +44,10 @@ router.get('/movies',function(req,res){
 router.get('/movies/:num',function(req,res){
     let pictures = ["pk","ravan","timestory","double attack"]
     
-    let bring = req.params.num
-    
-        let see = pictures[bring]
-    if(bring = see){
-        res.send(see)
-    }else{ res.send("use a valid index number")}
+    let indexNumber = req.params.num
+    let pic = pictures[indexNumber]
+    res.send(pic)
+   
 
 
 })
@@ -73,7 +71,17 @@ router.get('/films',function(req,res){
         { id : 4 , name : "flying jatt"},
 
     ]
+    
     let contain = req.params.filmId
+
+    for (let i = 0 ; i < movies.length ; i ++){
+        const m =movies[i]
+        if (m.id == contain){
+            return res.send(m)
+        }
+    }
+    res.send("movies does not exist")
+   
    
     
     
