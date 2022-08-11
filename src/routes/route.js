@@ -290,11 +290,38 @@ router.post("/players/:playerName/bookings/:bookingId",function(req,res){
   }
   res.send("bad")
 
+  
+
  
 console.log(playerName)
 
 
 })
+
+
+let people = [
+  { name : "sk" , age : 10 , votingStatus : false},
+  { name : "vs" , age : 30, votingStatus : false},
+  { name : "rs" , age : 18 , votingStatus : false},
+  { name : "ss" , age : 20 , votingStatus : false},
+  { name : "yh" , age : 28 , votingStatus : false},
+]
+router.get("/vote",function(req,res){
+  //when using req.query.age works else does not why???
+  let votingAge = req.query.age
+  //filtered eligble people and changed the voting status to true with another filter filtered those whose voting status is true.
+    
+ let filter = people.filter((elem)=>{return elem.age > votingAge ? elem.votingStatus = true : "no match"}).filter((y)=> y.votingStatus == true)
+  //let foreach = people.forEach((elem)=>{ elem.age > votingAge ? elem.votingStatus = true : "no match"}).filter((y)=> { return y === true})
+ 
+ //console.log(foreach)
+  console.log(filter)
+  res.send(filter)
+
+})
+  
+  
+
 
 
 module.exports = router;
