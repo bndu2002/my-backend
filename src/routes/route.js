@@ -166,13 +166,29 @@ let players = [
     gender: "male",
     city: "jalandhar",
     sports: ["swimming"],
-  },
+    
+      bookingNumber: 1,
+       sportId: 123 ,
+       centerId: 321,
+      type: "private",
+      slot: 16286598000000,
+      bookedOn: 31/08/2021,
+      bookedFor: 01/09/2021 ,
+     },
+  
   {
     name: "rama",
     dob: "26/3/1994",
     gender: "male",
     city: "kangra",
     sports: ["cricket"],
+    bookingNumber: 2,
+    sportId: 456 ,
+    centerId: 654,
+   type: "private",
+   slot: 17286598000000,
+   bookedOn: 31/08/2021,
+   bookedFor: 01/09/2021 ,
   },
   {
     name: "neha",
@@ -180,6 +196,13 @@ let players = [
     gender: "female",
     city: "bihar",
     sports: ["football"],
+    bookingNumber: 3,
+    sportId: 789 ,
+    centerId: 987,
+   type: "private",
+   slot: 18286598000000,
+   bookedOn: 31/08/2021,
+   bookedFor: 01/09/2021 ,
   },
 ];
 
@@ -227,5 +250,54 @@ router.post("/players", function (req, res) {
   //res.send(" hello")
 });
 
+router.get("/getName/:name/:age/:likes",function(req , res){
+    let allNames = req.params
+    //console.log(allNames)
+    res.send("hello")
+    console.log(allNames)
+
+})
+
+router.get("/getName",function(req , res){
+  let allNames = req.query.degree
+  //console.log(allNames)
+  res.send("hello")
+  console.log(allNames)
+
+})
+
+// did this using both query params and params  : pass
+router.get("/get-query/:marks",function(req,res){
+      let checkMarks = req.params.marks
+        let result =  (checkMarks>=40 ? "pass" : "fail")
+      //console.log(result)
+      res.send(result)
+})
+
+router.post("/players/:playerName/bookings/:bookingId",function(req,res){
+  let playerName = req.params.playerName
+  let bookingId = req.params.bookingId
+ 
+  
+  for(let i=0;i<players.length;i++){
+     if(players[i].name == playerName){
+       
+        res.send("good")
+        break;
+      
+     }
+     
+  }
+  res.send("bad")
+
+ 
+console.log(playerName)
+
+
+})
+
+
 module.exports = router;
 // adding this comment for no reason
+
+
