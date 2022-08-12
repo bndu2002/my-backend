@@ -209,10 +209,10 @@ let players = [
 router.post("/players", function (req, res) {
   let playersInBody = req.body;
 
-  // let isNameRepeated = false
+ // let isNameRepeated = false
 
-  // for(let i = 0 ; i < all.length ; i ++){
-  //     if(all[i].name === hanyu.name){
+  // for(let i = 0 ; i < players.length ; i ++){
+  //     if(players[i].name === playersInBody.name){
   //         isNameRepeated = true;
   //         break;
   //     }
@@ -220,34 +220,38 @@ router.post("/players", function (req, res) {
   // if(isNameRepeated){
   //     res.send("already exists")
   // }else{
-  //      all.push(hanyu)
-  //     res.send(all)
+  //      players.push(playersInBody)
+  //     res.send(players)
   //       }
 
-  for (let i = 0; i < players.length; i++) {
+
+  // TRIED TO DO IT WITHOUT FLAG ------> worked partially
+  // for (let i = 0; i < players.length; i++) {
+  //   if (players[i].name == playersInBody.name) {
+  //     res.send("already exists");
+
+  //   } 
+  // }
+  //  {
+  //   players.push(playersInBody);
+  //   res.send(players);
+  //  }
+
+
+  //TRIED TO DO IT WITHOUT FLAG ------> worked partially
+   for (let i = 0; i < players.length; i++) {
     if (players[i].name == playersInBody.name) {
       res.send("already exists");
 
-    } 
+    } else{
+        players.push(playersInBody);
+        res.send(players);
+       }
   }
-   {
-    players.push(playersInBody);
-    res.send(players);
-   }
-
-//    for (let i = 0; i < players.length; i++) {
-//     if (players[i].name == playersInBody.name) {
-//       res.send("already exists");
-
-//     } else{
-//         players.push(playersInBody);
-//         res.send(players);
-//        }
-//   }
    
 
   // console.log(hanyu)
-  //res.send(" hello")
+  res.send(players)
 });
 
 router.get("/getName/:name/:age/:likes",function(req , res){
@@ -311,12 +315,15 @@ router.get("/vote",function(req,res){
   let votingAge = req.query.age
   //filtered eligble people and changed the voting status to true with another filter filtered those whose voting status is true.
     
- let filter = people.filter((elem)=>{return elem.age > votingAge ? elem.votingStatus = true : "no match"}).filter((y)=> y.votingStatus == true)
+ let filter = people.filter((elem)=>{return elem.age > votingAge ? elem.votingStatus = true   : "no match"}).filter((y)=> y.votingStatus == true)
   //let foreach = people.forEach((elem)=>{ elem.age > votingAge ? elem.votingStatus = true : "no match"}).filter((y)=> { return y === true})
- 
- //console.log(foreach)
-  console.log(filter)
-  res.send(filter)
+
+
+  //  let fuu = people.filter(function(elem){ return elem.age > votingAge 
+//  })
+//  //console.log(foreach)
+//   console.log(fuu)
+   res.send({ dats : filter , status : true})
 
 })
   
