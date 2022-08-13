@@ -1,6 +1,8 @@
 const express = require('express');
 const myHelper = require('../util/helper')
 const underscore = require('underscore')
+const userModel = require('../models/model.js')
+const usercontroller = require('../controller/controller.js')
 
 const router = express.Router();
 
@@ -35,6 +37,13 @@ router.get('/candidates/:canidatesName', function(req, res){
     console.log('Candidates name is '+req.params.canidatesName)
     res.send('Done')
 })
+
+router.post("/createUser", usercontroller.createUsers)
+   
+
+
+router.get("/getUser", usercontroller.getusers)
+   
 
 
 module.exports = router;
