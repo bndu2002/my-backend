@@ -23,7 +23,24 @@ const userSchema = new mongoose.Schema( {
     // cars: [ String  ]
 }, { timestamps: true });
 
+
+const bookSchema = new mongoose.Schema({
+    bookName : {   
+        type : String,
+        required : true,
+        unique : true
+    },
+    authorName : {
+        type : String,
+        required : true
+    },
+    category : [string],
+    PublishingYear : Number,
+
+},{timestamps : true});
+
 module.exports = mongoose.model('User', userSchema) //users
+module.exports = mongoose.model('Book',bookSchema)
 
 
 
