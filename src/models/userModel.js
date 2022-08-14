@@ -34,13 +34,15 @@ const bookSchema = new mongoose.Schema({
         type : String,
         required : true
     },
-    category : [string],
+    category : [String],
     PublishingYear : Number,
 
 },{timestamps : true});
 
+
+
 module.exports = mongoose.model('User', userSchema) //users
-module.exports = mongoose.model('Book',bookSchema)
+ module.exports = mongoose.model('Book',bookSchema)//books
 
 
 
