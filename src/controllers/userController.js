@@ -49,14 +49,22 @@ const getBooksInYear = async function (req,res){
     res.send({ msg : getbook})
 }
 
-const getParticularBooks = async function (req,res){
-    let authorName = req.query.authorName
-    let bookName = req.query.bookName
-    let year = req.query.year
-
-    let getbook = await UserModel.find({authorName : {$eq :authorName }})
+const getParticularBooks = async function (req,res){ 
+    let getbook = await UserModel.find(req.query)//req.body can also be used here.
     res.send(getbook)
     
+}
+
+const getXINRBooks = async function (req,res){
+   
+    let getbook = await UserModel.find({"prices.indianPrice" : { $in : ["₹100" , "₹200" ,"₹500"]}})
+    res.send({ msg : getbook})
+}
+
+const getRandomBooks = async function (req,res){
+    
+    let get = await UserModel.find({$or : [{stockAvailable : true},{totalpages : { $gt : 500}}]})
+    res.send({ msg : get})
 }
 
 module.exports.createUser= createUser
@@ -68,3 +76,5 @@ module.exports.getNewbooks = getNewbooks
 module.exports.bookList = bookList
 module.exports.getBooksInYear = getBooksInYear
 module.exports.getParticularBooks = getParticularBooks
+module.exports.getXINRBooks = getXINRBooks
+module.exports.getRandomBooks = getRandomBooks

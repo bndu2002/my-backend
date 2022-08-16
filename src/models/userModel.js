@@ -49,7 +49,7 @@ let newBookSchema = new mongoose.Schema({
   totalpages : Number,
   prices : {
     indianPrice : String,
-    usaPrice : String   
+    euroPrice : String   
   },
   year : {
      type : String,

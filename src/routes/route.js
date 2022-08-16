@@ -25,6 +25,10 @@ router.post("/getBooksInYear",UserController.getBooksInYear)
 
 router.post("/getParticularBooks",UserController.getParticularBooks)
 
+router.get("/getXINRBooks",UserController.getXINRBooks)
+
+router.get("/getRandomBooks",UserController.getRandomBooks)
+
 module.exports = router;
 
 // Create a bookSchema with bookName, authorName, category and year . Create same 2 api's for books i.e. : 1 api to create a new book and another api to get the list of all books.
