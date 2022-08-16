@@ -39,10 +39,30 @@ const bookSchema = new mongoose.Schema({
 
 },{timestamps : true});
 
+let newBookSchema = new mongoose.Schema({
+  bookName : {
+     type : String,
+      required : true
+    },
+    tags : [String],
+  authorName : String,
+  totalpages : Number,
+  prices : {
+    indianPrice : String,
+    usaPrice : String   
+  },
+  year : {
+     type : String,
+      default : 2021
+    },
+    stockAvailable : Boolean  
+},{ timestamps : true})
+
 
 
 module.exports = mongoose.model('User', userSchema) //users
- module.exports = mongoose.model('Book',bookSchema)//books
+module.exports = mongoose.model('Book',bookSchema)//books
+module.exports = mongoose.model('NewBook',newBookSchema)
 
 
 

@@ -15,6 +15,16 @@ router.post("/createBook",UserController.createBook)
 
 router.get("/getBooks",UserController.getBooks)
 
+router.post("/createNewbook",UserController.newBookSchema)
+
+router.get("/getNewBooks",UserController.getNewbooks)
+
+router.get("/getBookList",UserController.bookList)
+
+router.post("/getBooksInYear",UserController.getBooksInYear)
+
+router.post("/getParticularBooks",UserController.getParticularBooks)
+
 module.exports = router;
 
 // Create a bookSchema with bookName, authorName, category and year . Create same 2 api's for books i.e. : 1 api to create a new book and another api to get the list of all books.
