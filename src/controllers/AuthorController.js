@@ -33,7 +33,7 @@ const twoStates = async function(req,res){
 const bookFind = async function(req,res){
     let book = await PustakModel.find({price : { $gte : 50 , $lte : 100} })//.select({})
     res.send(book)
-    let author = await 
+    //let author = await 
 }
 
 module.exports.createAuthor = createAuthor
