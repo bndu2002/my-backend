@@ -4,7 +4,7 @@ const pustakSchema = new mongoose.Schema({
     pustakName : String,
     author_id : {
         type : Number,
-        required : true
+       // required : true
     },
     price : Number,
     ratings : String
