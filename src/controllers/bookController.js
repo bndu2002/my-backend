@@ -18,6 +18,20 @@ const getBooksWithAuthorDetails = async function (req, res) {
 
 }
 
+const createNewbook = async function (req,res){
+   let newbook = req.body 
+
+   if(!author){ 
+   return res.send({status : false , msg : "author id is mandetory"})
+   }
+   let savebook = await bookModel.create(newbook)
+   res.send({msg : savebook})
+
+}
+
+
+
 module.exports.createBook= createBook
 module.exports.getBooksData= getBooksData
 module.exports.getBooksWithAuthorDetails = getBooksWithAuthorDetails
+module.exports.createNewbook = createNewbook
