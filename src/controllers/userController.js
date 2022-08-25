@@ -25,7 +25,6 @@ const createUser= async function (req, res) {
     console.log(tokenDataInHeaders)
     //Set a header in request
     req.headers['month']='June' //req.headers.month = "June"
-
     //Set an attribute in request object
     req.anything = "everything"
     
@@ -33,8 +32,11 @@ const createUser= async function (req, res) {
     console.log("Request headers after modificatiom",req.headers)
     
     //Set a header in response
-    res.header('year','2022')
-    res.send({msg: "Hi"})
+     res.header('year','2022')
+    res.send({msg:"hi"})
+   
+    // console.log(req.headers["address-pincode"])//printing th epincode
+    // conslole.log(req.headers.address-pincode)//error => pincode is not defined
 }
 
 const getUsersData= async function (req, res) {
