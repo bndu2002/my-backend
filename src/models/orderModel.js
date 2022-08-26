@@ -12,11 +12,11 @@ const orderSchema = new mongoose.Schema({
         type : ObjectId,
         ref : 'Product'
     },
-	amount: {
-        type : Number,
-        default : 0
+	amount: Number,
+	isFreeAppUser: {
+        type : Boolean,
+        default : true
     },
-	isFreeAppUser: Boolean, 
 	date: String
 },{ timestamps: true })
 

@@ -14,6 +14,8 @@ router.post("/createUser",commonMW.mid1, UserController.createUser)
 
 router.post('/createProduct',productController.createProduct)
 
+router.post('/createOrder',commonMW.mid1,orderController.createOrder)
+
 //router.post('/createUser',mid1, UserController.createUser)
 
 
