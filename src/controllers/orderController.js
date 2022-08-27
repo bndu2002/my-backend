@@ -2,58 +2,59 @@ const orderModel = require("../models/orderModel");
 const userModel = require("../models/userModel");
 const productModel = require("../models/productModel");
 
-const createOrder = async function (req, res) {
-  const orderData = req.body;
-  const userId = req.body.userId;
-  const productId = req.body.productId;
-  const validUser = await userModel.findById(userId);
-  const validProduct = await productModel.findById(productId);
-  const appType = req.headers.isfreeappuser;
+const createOrder = async function(req , res){
+const orderData = req.body
+const user = await userModel.findById(orderData.userId)
+if(!user){
+  return res.send({status : false , msg : "user id not available"})
+}
+const product = await productModel.findById(orderData.productId)
+if(!product){
+  return res.send({status : false , msg : "product id not available"})
+}
 
-  if (userId) {
-    if (validUser) {
-      if (productId) {
-        if (validProduct) {
-          if (appType) {
-            orderData.isFreeAppUser = true;
-            orderData.amount = 0;
-            const createOrder = await orderModel.create(orderData);
-              return res.send({ msg: createOrder });
-          } else {
-            if (validUser.balance < validProduct.price) {
-              res.send({ msg: "user does not have sufficient balance" });
-            } else {
-              console.log("reached");
-              const updateUser = await userModel.findOneAndUpdate(
-                { _id: orderData.userId },
-                { balance: validUser.balance - validProduct.price },
-                { new: true }
-              );
-              // res.send(updateUser)
-              // console.log('reached',updateUser)
-              orderData.amount = validProduct.price;
-              orderData.isFreeAppUser = appType;
-              const createOrder = await orderModel.create(orderData);
-              return res.send({ msg: createOrder });
-            }
-            
-          }
-        } else {
-          res.send("invalid product id");
-        }
-      } else {
-        res.send("product id not available");
-      }
-    } else {
-      res.send("invalid user id");
-    }
-  } else {
-    return res.send("user is not available");
+if(req.headers.isfreeappuser == false ){
+  user.isFreeAppUser = false
+  if(user.balance >= product.price ){
+    const updateUser = await userModel.findOneAndUpdate(
+      {_id : orderData.userId },
+      {balance : user.balance - product.price},
+      {new : true}
+    )
+    orderData.isFreeAppUser = false
+    orderData.amount =  product.price
   }
-};
+  if(user.balance < product.price){
+    orderData.isFreeAppUser = false
+    user.isFreeAppUser = false
+   return res.send({status : false , msg: "user does not have sufficient balance"})
+  }
+ 
+}else{
+  user.isFreeAppUser = true
+orderData.isFreeAppUser = true
+orderData.amount = 0
+console.log(user.isFreeAppUser)
+}
+const createOrder = await orderModel.create(orderData)
+res.send({status : true , msg : createOrder})
+}
+
+
+
 
 // For paid user app and the user has sufficient balance. We deduct the balance from user's balance and update the user. We create an order document
 
 module.exports.createOrder = createOrder;
 
 
+// if(user.balance < product.price){
+//   orderData.isFreeAppUser = false
+//   user.isFreeAppUser = false
+//  return res.send({status : false , msg: "user does not have sufficient balance"})
+// }
+// // }else{ 
+// user.isFreeAppUser = true
+// orderData.isFreeAppUser = true
+// orderData.amount = 0
+// // }

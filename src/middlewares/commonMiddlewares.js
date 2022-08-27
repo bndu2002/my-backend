@@ -17,7 +17,7 @@ const mid1= function ( req, res, next){
     }else{
       isAppFree = true
     }
-  //req.isUserAppFree = isAppFree
+ // req.isUserAppFree = isAppFree
   req.headers.isfreeappuser = isAppFree
   //console.log(isAppFree)
   
