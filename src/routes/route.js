@@ -9,10 +9,10 @@ router.post("/users" , userController.createUser)
 
 router.post("/login",middleware.userVerification, userController.loginUser)
 
-router.get("/users/:userId",middleware.tokenValidation, userController.getDetails)
+router.get("/users/:userId",middleware.tokenValidation,middleware.userAuthorisation, userController.getDetails)
 
-router.put("/users/:userId",middleware.tokenValidation, userController.updateUser)
+router.put("/users/:userId",middleware.tokenValidation,middleware.userAuthorisation, userController.updateUser)
 
-router.delete("/users/:userId",middleware.tokenValidation, userController.deleteUser)
+router.delete("/users/:userId",middleware.tokenValidation,middleware.userAuthorisation, userController.deleteUser)
 
 module.exports = router;
