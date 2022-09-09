@@ -72,107 +72,159 @@ const updateBlog = async function (req, res) {
   }
 };
 
+// const deleteBlogByQuery = async function (req, res) {
+//   try {
+//     let data = req.query;
+//     console.log(".........here", data);
+//     // let blogObjId = data._id;
+//     // let authorObjId = data.authorId;
+//     let category = req.query.category
+    
+
+//     let findData = await blogsModel.findOne(data);
+//     console.log(".......", typeof(findData));
+
+//     if (Object.keys(data).length === 0) {
+//       return res
+//         .status(400)
+//         .send({ status: false, msg: "choose what you want to delete" });
+//     }
+
+    
+//     // if (blogObjId) {
+//     //   if (findData != blogObjId) {
+//     //     return res.status(400).send({status:false , msg : "invalid blog id"});
+//     //   }
+//     // }
+
+//     // if (authorObjId) {
+//     //   if (findData != authorObjId) {
+//     //     return res.status(400).send({status : false , msg : "invalid author id"});
+//     //   }
+//     // }
+
+//     if(findData === null){
+//       return res.status(400).send({status:false , msg :"no such blog exists"})
+//     }
+    
+    
+
+//     if(!data.body || data.tags || data.authorId ||data.subcategory||data.title|| category ||data.isPublished||data._id){
+//       return res.status(400).send({status : false , msg : "please enter a valid filter"})
+//     }
+//     console.log("=======>",typeof(data.category))
+
+
+//     //combined validation for authorId and blogId====================>this is working
+//     // if ( findData === null) {
+//     //   return res.status(404).send({status : false , msg : "blog does not exist"});
+//     // }
+
+//    // if(data.tags){
+//     // if(findData.tags != data.tags){
+//     //   return res.send("enter a valid filter")
+//     // }
+
+//     // if(data.subcategory){
+//     // if(findData.subcategory != data.subcategory){
+//     //  return res.send("enter a valid filter")
+//     // }}
+
+//     // if(findData.category != data.category){
+//     //   return res.send("enter a valid filter")
+//     //  }
+    
+//     // if (findData.isPublished != data.isPublished) {
+//     //   return res.send("enter a valid filter");
+//     // }
+
+//     // if(data.body){
+//     //   if(data.body != findData.body){
+//     //     res.send("enter valid filter")
+//     //   }
+//     // }
+
+//     // if (data.title) {
+//     //   if (findData.title != data.title) {
+//     //     return res.status(400).send("enter a valid filter");
+//     //   }
+//     // }
+   
+//     // subcategory.join(" ") //opposite of join
+//     //           .split(",")// lets use more then one values for array in query param
+    
+//     // if (findData.body != data.body) 
+//     // {
+//     //   console.log("error")
+//     //   return res.status(400).send("enter a valid filter");
+//     // }
+
+//     if (findData.isDeleted == true) {
+//       return res
+//         .status(404)
+//         .send({ status: false, msg: "blog is already deleted" });
+//     }
+
+//     let updateData = await blogsModel.updateMany(
+//       data,
+//       { $set: { isDeleted: true } },
+//       { new: true }
+//     );
+//     return res
+//       .status(200)
+//       .send({ status: true, msg: "blog is deleted successfully" });
+//   } catch (error) {
+//     return res.status(500).send({ status: false, msg: error.message });
+//   }
+// };
+//successfull code
 const deleteBlogByQuery = async function (req, res) {
   try {
     let data = req.query;
-    console.log(".........here", data);
-    // let blogObjId = data._id;
-    // let authorObjId = data.authorId;
-    let category = req.query.category
-    
-
-    let findData = await blogsModel.findOne(data);
-    console.log(".......", typeof(findData));
 
     if (Object.keys(data).length === 0) {
       return res
         .status(400)
         .send({ status: false, msg: "choose what you want to delete" });
     }
-
-    
-    // if (blogObjId) {
-    //   if (findData != blogObjId) {
-    //     return res.status(400).send({status:false , msg : "invalid blog id"});
-    //   }
-    // }
-
-    // if (authorObjId) {
-    //   if (findData != authorObjId) {
-    //     return res.status(400).send({status : false , msg : "invalid author id"});
-    //   }
-    // }
-
-    if(findData === null){
-      return res.status(400).send({status:false , msg :"no such blog exists"})
-    }
-    
-    
-
-    if(!data.body || data.tags || data.authorId ||data.subcategory||data.title|| category ||data.isPublished||data._id){
-      return res.status(400).send({status : false , msg : "please enter a valid filter"})
-    }
-    console.log("=======>",typeof(data.category))
-
-
-    //combined validation for authorId and blogId====================>this is working
-    // if ( findData === null) {
-    //   return res.status(404).send({status : false , msg : "blog does not exist"});
-    // }
-
-   // if(data.tags){
-    // if(findData.tags != data.tags){
-    //   return res.send("enter a valid filter")
-    // }
-
-    // if(data.subcategory){
-    // if(findData.subcategory != data.subcategory){
-    //  return res.send("enter a valid filter")
-    // }}
-
-    // if(findData.category != data.category){
-    //   return res.send("enter a valid filter")
-    //  }
-    
-    // if (findData.isPublished != data.isPublished) {
-    //   return res.send("enter a valid filter");
-    // }
-
-    // if(data.body){
-    //   if(data.body != findData.body){
-    //     res.send("enter valid filter")
-    //   }
-    // }
-
-    // if (data.title) {
-    //   if (findData.title != data.title) {
-    //     return res.status(400).send("enter a valid filter");
-    //   }
-    // }
-   
-    // subcategory.join(" ") //opposite of join
-    //           .split(",")// lets use more then one values for array in query param
-    
-    // if (findData.body != data.body) 
-    // {
-    //   console.log("error")
-    //   return res.status(400).send("enter a valid filter");
-    // }
-
-    if (findData.isDeleted == true) {
+    if (req.decodedToken.authorId != data.authorId) {
       return res
-        .status(404)
-        .send({ status: false, msg: "blog is already deleted" });
+        .status(401)
+        .send({ status: false, msg: "Unauthorized Author" });
     }
 
-    let updateData = await blogsModel.updateMany(
-      data,
-      { $set: { isDeleted: true } },
-      { new: true }
-    );
-    return res
-      .status(200)
-      .send({ status: true, msg: "blog is deleted successfully" });
+    let findData = await blogModel.find({
+      $or: [
+        { tags: data.tags },
+        { isPublished: data.isPublished },
+        { category: data.category },
+        { subcategory: data.subcategory },
+      ],
+    });
+    console.log(".......", findData);
+
+    if (!findData.length > 0) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "no such blog exists" });
+    }
+
+    for (let items of findData) {
+      console.log(items);
+      if (items.isDeleted == false) {
+        console.log("jaaaaaaa");
+        let blogData = await blogModel.findOneAndUpdate(
+          { authorId: items.authorId },
+          { $set: { isDeleted: true } },
+          { new: true }
+        );
+        return res
+          .status(200)
+          .send({ status: false, msg: "deleted successfully" });
+      } else {
+        return res.status(400).send({ status: false, msg: "already deleted" });
+      }
+    }
   } catch (error) {
     return res.status(500).send({ status: false, msg: error.message });
   }
