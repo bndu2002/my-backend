@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const authorController=require("../controllers/authorsController")
 const blogController=require("../controllers/blogsController")
-const middleWare=require("../Middleware/Middleware")
+const middleWare=require("../Middleware/Middleware");
+
 
 
 router.get("/test-me",function(req,res){
@@ -30,8 +31,7 @@ router.delete("/blogs/:blogId", middleWare.authenticate, blogController.deleteBl
 router.delete("/delete" , middleWare.authenticate , blogController.deleteBlogByQuery)
 
 
-//......................................FOR restore  all data-------//
-//router.delete("/undelete",blogController.undeleteall)
+
 
 
 module.exports = router;   

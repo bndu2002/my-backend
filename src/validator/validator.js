@@ -1,8 +1,8 @@
 const isValidMail = (/^([0-9a-z]([-_\\.]*[0-9a-z]+)*)@([a-z]([-_\\.]*[a-z]+)*)[\\.]([a-z]{2,9})+$/);
 
-
 const isValidName = (/^[a-zA-Z ]*$/)
 
+const isValidPassword = (/^.*(?=.{6,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!&$%&? "]).*$/)
 
 const isValid = (value) => {
     if (typeof value === "undefined" || value === null) return false
@@ -15,14 +15,6 @@ const isValidRequestBody = (value) => {
 }
 
 
-
-
-
-
-
-
-
-module.exports = {
-    isValidMail, isValid, isValidName, isValidRequestBody
-}
+                  //exported all functions & variables at once using destructuring
+module.exports = {isValidMail, isValid, isValidName, isValidRequestBody,isValidPassword}
 

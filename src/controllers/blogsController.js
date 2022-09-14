@@ -1,48 +1,44 @@
 const blogModel = require("../model/blogsModel");
 const authorModel = require("../model/authorsModel");
-const moment = require("moment");
+
 const mongoose = require("mongoose");
-const { query } = require("express");
 const { isValidRequestBody } = require("../validator/validator");
 
 //----------------------------Handler create A blog--------------------------//
 
 const createBlog = async function (req, res) {
   try {
-    let data = req.body;
+    let {title,authorId,body,category,subcategory,isDeleted,isPublished,tags} = req.body;
 
-    if (!isValidRequestBody(data))
-      return res.status(400).send({
-        status: false,
-        message: "Body can't be empty it must contain some data.",
-      });
+    if (!isValidRequestBody(req.body))return res.status(400).send({status: false,message: "Body can't be empty it must contain some data.",});
 
-    if (!data.title || !data.authorId || !data.body || !data.category) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "Body missing a mandatory field" });
+    if (!mongoose.isValidObjectId(authorId))return res.status(400).send({ status: false, msg: "Type of Author Id is must be ObjectId " });
+    
+    if(!title)return res.status(400).send({status : false , msg : "title is required"})
+    
+    if(!category)return res.status(400).send({status : false , msg : "category is required"})
+
+    if(!subcategory)return res.status(400).send({status : false , msg : "subcategory is required"})
+
+    if(!body)return res.status(400).send({status : false , msg : "body is required"})
+
+    if(!tags)return res.status(400).send({status : false , msg : "tags are required"})
+    
+    let checkAuthor = await authorModel.findById(authorId);
+
+    if (!checkAuthor){res.status(401).send({ msg: "author id is invalid" });}
+   
+    if (isPublished == true) {
+      //assigned a value (current date) to publishedAt 
+      req.body["publishedAt"] = Date.now();
     }
-    if (!mongoose.isValidObjectId(data.authorId))
-      return res
-        .status(400)
-        .send({ status: false, msg: "Type of BlogId is must be ObjectId " });
-    let checkAuthor = await authorModel.findById(data.authorId);
-
-    if (!checkAuthor) {
-      res.status(401).send({ msg: "author id is invalid" });
-    }
-    let checkblog = await blogModel.findById(data.authorId);
-
-    if (data.isPublished == true) {
-      //created new key "publishedAt" in data
-      data["publishedAt"] = moment().format();
-    }
-    if (data.isDeleted == true) {
-      //created new key "deletedAt" in data
-      data["deletedAt"] = moment().format();
+    if (isDeleted == true) {
+      //assigned a value (current date) to deleteddAt (default : false)
+      //idolly the doc shoud not get deleted at the time of creation
+      req.body["deletedAt"] = Date.now();
     }
 
-    let createData = await blogModel.create(data);
+    let createData = await blogModel.create(req.body);
     res.status(201).send({ status: true, data: createData });
   } catch (error) {
     res.status(500).send({ msg: error.message });
@@ -90,49 +86,30 @@ const getblog = async function (req, res) {
 const updateBlog = async function (req, res) {
   try {
     let blogId = req.params.blogId;
-    if (!blogId)
-      return res
-        .status(400)
-        .send({ status: false, msg: "Blog id is mandatory" });
+   
+    if (!blogId)return res.status(400).send({ status: false, msg: "Blog id is mandatory" });
 
-    if (!mongoose.isValidObjectId(blogId))
-      return res
-        .status(400)
-        .send({ status: false, msg: "Type of BlogId must be ObjectId " });
-    let foundDoc = await blogModel.findById( blogId);
-    if (foundDoc == null)
-      return res.status(404).send({ status: false, msg: "Blog is not found" });
-    let findByBlogId = foundDoc.authorId
-    if(findByBlogId != req.decodedToken.authorId){
-      return res.status(401).send({status:false , msg : "Unauthorized Author"})
-    }
+    if (!mongoose.isValidObjectId(blogId))return res.status(400).send({ status: false, msg: "Type of BlogId must be ObjectId " });
     
+    let foundDoc = await blogModel.findById(blogId);
     
-
+    if (foundDoc == null)return res.status(404).send({ status: false, msg: "Blog is not found" });
     
+    // Authorization Starts ---
 
-    //-----------authorization start-----------//
+    let findByBlogId = foundDoc.authorId;
+    if (findByBlogId != req.decodedToken.authorId){return res.status(403).send({ status: false, msg: "Unauthorized Author" });}
+    
+    // Authorization Ends /--
 
-    // let authorId = req.params.blogId
-    // let authorized_id = req.decodedToken["authorId"]
-    // if (userid != authorized_id) return res.status(403).send({ status: false, msg: "user is not authorized for this operation" })
-
-    //------------------------authorization end------------//
-
-    let data = req.body;
-    if (!isValidRequestBody(data))
-      return res.status(400).send({
-        status: false,
-        message: "Body can't be empty it must contain some data.",
-      });
-    let tags = data.tags;
-    let category = data.category;
-    let subcategory = data.subcategory;
-    let title = data.title;
-    let bodyData = data.body;
-    foundDoc.tags = foundDoc.tags.concat(tags);
-
+    if (!isValidRequestBody(req.body))return res.status(400).send({status: false,message: "Body can't be empty it must contain some data.",});
+    
+    let {tags,category,subcategory,title,body} = req.body
+    
+    foundDoc.tags =  foundDoc.tags.concat(tags)             // [foundDoc.tags,...tags] 
+                                                                                        
     foundDoc.subcategory = foundDoc.tags.concat(subcategory);
+    
     let result1 = foundDoc.tags.filter((b) => b != null);
     let result2 = foundDoc.subcategory.filter((b) => b != null);
 
@@ -144,17 +121,16 @@ const updateBlog = async function (req, res) {
           category: category,
           subcategory: result2,
           title: title,
-          bodyData: bodyData,
+          body: body,
           $set: { isPublished: true, publishedAt: Date.now() },
         },
         { new: true }
       );
-      return res
-        .status(200)
-        .send({ status: true, msg: " Blog is succesfully Upadated" });
-    }
-    return res.status(400).send({status:false , msg : "blog has been deleted"})
-  } catch (err) {
+      return res.status(200).send({ status: true, msg: "Blog is succesfully Upadated" ,data : updatedDoc});}
+   
+      return res.status(400).send({ status: false, msg: "blog has been deleted" });
+ 
+    } catch (err) {
     res.status(500).send({ status: false, msg: err.message });
   }
 };
@@ -164,34 +140,22 @@ const updateBlog = async function (req, res) {
 const deleteBlog = async function (req, res) {
   let blogId = req.params.blogId;
 
-  if (!mongoose.isValidObjectId(blogId))
-    return res
-      .status(400)
-      .send({ status: false, msg: "Type of BlogId is must be ObjectId " });
+  if (!mongoose.isValidObjectId(blogId))return res.status(400).send({ status: false, msg: "Type of BlogId is must be ObjectId " });
+  
+  //Authorization Starts ---
+
   let findByblogId = await blogModel.findById(blogId);
   let paramBlogId = findByblogId.authorId;
-  if (paramBlogId != req.decodedToken.authorId) {
-    return res.status(401).send({ status: false, msg: "Unauthorized Author" });
-  }
-  if (!findByblogId)
-    return res.status(404).send({ status: false, msg: "Blog is not found" });
+  
+  if (paramBlogId != req.decodedToken.authorId){return res.status(401).send({ status: false, msg: "Unauthorized Author" });}
+  //Authorization Ends /--
 
-  //-----------authorization start-----------//
+  if (!findByblogId)return res.status(404).send({ status: false, msg: "Blog is not found" });
 
-  //---this will be evaluated as =>
-  // blogObjId != authorObjId (this will always throw " unauthorized author")
-  // let userid = blogs["authorId"]
-  // let authorized_id = req.decodedToken["authorId"]
-  // if (userid != authorized_id) return res.status(403).send({ status: false, msg: "user is not authorized for this operation" })
-
-  //------------------------authorization end------------//
-
-  if (findByblogId.isDeleted == true) {
-    return res
-      .status(400)
-      .send({ status: false, msg: "this blog  is already deleted." });
+  if (findByblogId.isDeleted == true){
+    return res.status(400).send({ status: false, msg: "this blog is already deleted." });
   } else {
-    let updatebloge = await blogModel.findOneAndUpdate(
+    let updateblog = await blogModel.findOneAndUpdate(
       { _id: blogId },
       { isDeleted: true },
       { new: true }
@@ -200,25 +164,17 @@ const deleteBlog = async function (req, res) {
   }
 };
 
-
-
 const deleteBlogByQuery = async function (req, res) {
   try {
     let data = req.query;
-   
+
+    if (Object.keys(data).length === 0){return res.status(400).send({ status: false, msg: "choose what you want to delete" });}
     
-
-    if (Object.keys(data).length === 0) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "choose what you want to delete" });
-    }
-    if (req.decodedToken.authorId != data.authorId) {
-      return res
-        .status(401)
-        .send({ status: false, msg: "Unauthorized Author" });
-    }
-
+    //Authorization Starts ---
+    if (req.decodedToken.authorId != data.authorId){return res.status(401).send({ status: false, msg: "Unauthorized Author" });}
+    //Authorization Ends /--
+   
+   // find doc which has any of these filters
     let findData = await blogModel.find({
       $or: [
         { tags: data.tags },
@@ -227,32 +183,28 @@ const deleteBlogByQuery = async function (req, res) {
         { subcategory: data.subcategory },
       ],
     });
-    console.log(".......", findData);
     
-    if (!findData.length > 0) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "no such blog exists" });
+    
+    // find returns an array hence .length , if the lenght is not grater than 0 
+    if (!findData.length > 0){
+      return res.status(400).send({ status: false, msg: "no such blog exists" });
     }
 
+    // used for of  for iterable objects (arrays) , traversed over the array updated docs whose isDeleted == false
+    // extracted  blogs of the particular author in findData on 177
     for (let items of findData) {
-      console.log(items);
+         console.log(items);
       if (items.isDeleted == false) {
-        console.log("jaaaaaaa");
         let blogData = await blogModel.findOneAndUpdate(
           { authorId: items.authorId },
           { $set: { isDeleted: true } },
           { new: true }
         );
-        return res
-          .status(200)
-          .send({ status: false, msg: "deleted successfully" });
+        return res.status(200).send({ status: false, msg: "deleted successfully" });
       } else {
         return res.status(400).send({ status: false, msg: "already deleted" });
       }
     }
-
-   
   } catch (error) {
     return res.status(500).send({ status: false, msg: error.message });
   }
@@ -263,4 +215,3 @@ module.exports.getblog = getblog;
 module.exports.updateBlog = updateBlog;
 module.exports.deleteBlog = deleteBlog;
 module.exports.deleteBlogByQuery = deleteBlogByQuery;
-
