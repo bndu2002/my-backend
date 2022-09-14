@@ -1,0 +1,1 @@
+const InternModel= require("../models/internModel")
