@@ -11,7 +11,8 @@ app.use(express.json());
 mongoose.connect("mongodb+srv://panigrahisameer_200:iklsSoxrtvpy4JOK@cluster0.kyd9m93.mongodb.net/group56Database", {
     useNewUrlParser: true
 })
-.then( () => console.log("MongoDb is connected"),err => console.log(err))
+.then( () => console.log("MongoDb is connected"),
+err => console.log(err))
 
 
 app.use('/', route);
