@@ -9,6 +9,9 @@ router.post("/functionup/interns",InternController.createIntern)
 
 router.get("/functionup/collegeDetails",CollegeController.getCollegDetails)
 
+//validation for correct endpoint or request url
+router.all("/*", (req,res)=>{return res.status(400).send({status:false,message:"Invalid Endpont"})})
+
 
 
 
