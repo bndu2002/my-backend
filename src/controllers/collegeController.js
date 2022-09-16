@@ -1,26 +1,29 @@
 const collegeModel = require('../models/collegeModel')
 const internModel = require('../models/internModel')
-const{isValidName , isValidRequestBody , isValid , isValidLink} = require('../validator/validator')
+const{isValidName , isValidRequestBody , isValid , isValidLink } = require('../validator/validator')
 
 
 const createCollege= async function(req,res){
     try {
         const {name,fullName,logoLink}= req.body
        
-        if(!isValidRequestBody(req.body))return res.status(400).send({status:false , msg:"No Input"})
+        if(!isValidRequestBody(req.body))return res.status(400).send({status:false , message:"No Input"})
        
-        if(!isValid(name))return res.status(400).send({status:false , msg:"Name Is Required"})
+        if(!isValid(name))return res.status(400).send({status:false , message:"Name Is Required"})
         
         //.test() : regex method ,called upon a regex object (isValidName , here) ,match text/String with the patterns ,return Boolean
-        if(!isValidName.test(name))return res.status(400).send({status:false , msg:"Please Enter A Valid Name"})
+        if(!isValidName.test(name))return res.status(400).send({status:false , message:"Please Enter A Valid Name"})
         
-        if(!isValid(fullName))return res.status(400).send({status:false , msg:"Full Name Is Required"})
+        if(!isValid(fullName))return res.status(400).send({status:false , message:"Full Name Is Required"})
        
-        if(!isValidName.test(fullName))return res.status(400).send({status:false , msg:"Please Enter A Valid Full Name"})
+        if(!isValidName.test(fullName))return res.status(400).send({status:false , message:"Please Enter A Valid Full Name"})
 
-        if(!isValid(logoLink))return res.status(400).send({status:false , msg:"LogoLink Is Required"})
+        let duplicateCollege = await collegeModel.findOne({$or:[{name : name},{fullName:fullName}]})
+        if(duplicateCollege)return res.status(400).send({status:false,message : "College Already Exists"})
 
-        if(!isValidLink.test(logoLink))return res.status(400).send({status:false , msg:"Please Enter A Valid LogoLink"})
+        if(!isValid(logoLink))return res.status(400).send({status:false , message:"LogoLink Is Required"})
+
+        if(!isValidLink.test(logoLink))return res.status(400).send({status:false ,message:"Please Enter A Valid LogoLink"})
         
         const saveInter= await collegeModel.create(req.body)
 
@@ -36,7 +39,7 @@ const getCollegDetails = async function(req,res){
     try {
         let data = req.query
 
-        if(Object.keys(data).length === 0)return res.status(400).send({status:false,msg:"Select Filter"})
+        if(Object.keys(data).length === 0)return res.status(400).send({status:false,message:"Select Filter"})
         
         let findCollege = await collegeModel.findOne({name : data.collegeName})
        
