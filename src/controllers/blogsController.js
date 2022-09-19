@@ -34,7 +34,7 @@ const createBlog = async function (req, res) {
     }
     if (isDeleted == true) {
       //assigned a value (current date) to deleteddAt (default : false)
-      //idolly the doc shoud not get deleted at the time of creation
+      //idolly the doc should not get deleted at the time of creation
       req.body["deletedAt"] = Date.now();
     }
 
@@ -48,35 +48,28 @@ const createBlog = async function (req, res) {
 //----------------------------Handler for fetch a blog--------------------------//
 const getblog = async function (req, res) {
   try {
-    if (Object.keys(req.query).length === 0) {
-      let totalBlogs = await blogModel.find({
-        isDeleted: false,
-        isPublished: true,
-      });
-      if (totalBlogs.length === 0)
-        return res
-          .status(404)
-          .send({ status: false, msg: "Blogs don't exist" });
+    if(Object.keys(req.query).length === 0){
+      let totalBlogs = await blogModel.find({isDeleted: false,isPublished: true,});
+      
+    if(totalBlogs.length === 0)return res.status(404).send({ status: false, msg: "Blogs don't exist" });
 
-      return res.status(200).send({ status: true, data: totalBlogs });
+    return res.status(200).send({ status: true, data: totalBlogs });
     }
+   
 
     let { _id, title, authorId, category, tags, subcategory } = req.query;
-    let query = {};
-    if (_id != null) query._id = _id;
-    if (title != null) query.title = title;
-    if (authorId != null) query.authorId = authorId;
-    if (category != null) query.category = category;
-    if (tags != null) query.tags = tags;
-    if (subcategory != null) query.subcategory = subcategory;
-    query.isDeleted = false;
-    query.isPublished = true;
-    let finalFilter = await blogModel.find(query);
-    if (finalFilter.length == 0)
-      return res
-        .status(404)
-        .send({ status: true, msg: "Request is Not found" });
-    return res.status(200).send({ status: true, msg: finalFilter });
+
+    
+    
+
+    let filterBlogs = await blogModel.find({$or:[{_id : _id},{title:title},{category:category},{tags:tags},{subcategory:subcategory}]})
+   
+    if(!filterBlogs.authorId === req.decodedToken.authorId)return res.status(403).send({status:false ,message : "Unauthorized User"})
+    
+    if (filterBlogs.length == 0)return res.status(404).send({ status: true, msg: "Request is Not found" });
+      
+    return res.status(200).send({ status: true, msg: filterBlogs });
+ 
   } catch (error) {
     res.status(500).send({ status: false, msg: error.message });
   }
