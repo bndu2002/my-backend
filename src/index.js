@@ -2,7 +2,6 @@ const express = require('express');
 const route = require('./routes/route.js');
 const mongoose = require('mongoose');
 const app = express();
-const aws = require('aws-sdk')
 const multer = require('multer')
 const PORT = process.env.PORT || 3000
 

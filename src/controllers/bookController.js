@@ -8,12 +8,10 @@ const {uploadFile} = require('../controllers/awsController')
 
 
 
-
-
 const createBook = async function (req, res) {
   try {
     
-    let data = req.body
+    
     
     let { title, excerpt, userId, ISBN, category, subcategory, releasedAt, isDeleted} = req.body
 
@@ -23,7 +21,7 @@ const createBook = async function (req, res) {
             // res.send the link back to frontend/postman
             let uploadedFileURL= await uploadFile( bookCover[0] )
             //bookCover was available in req.files ; added new key in req.body.bookCover = uploadedFileURL
-            data.bookCover= uploadedFileURL
+            req.bodygi.bookCover= uploadedFileURL
             // res.status(201).send({msg: "file uploaded succesfully", data: uploadedFileURL})
            //console.log(files)
         }

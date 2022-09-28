@@ -1,7 +1,6 @@
 const userController = require('../controllers/userController')
 const bookController = require('../controllers/bookController')
 const reviewController = require('../controllers/reviewController')
-const awsController = require('../controllers/awsController')
 const middle = require('../middleware/auth')
 const express = require('express')
 const router = express.Router();
@@ -26,9 +25,8 @@ router.put('/books/:bookId/review/:reviewId', reviewController.updateReview)
 
 router.delete('/books/:bookId/review/:reviewId', reviewController.deleteReview)
 
-router.post('/createURL',awsController.sdk)
 
-router.all('/*', (req, res) => { return res.status(400).send({ status: false, message: "Endpoint Is Incorrect" })})
+router.all('/*', (req, res) => { return res.status(400).send({ status: false, message: "Endpoint Is Incorrect" }) })
 
 
 

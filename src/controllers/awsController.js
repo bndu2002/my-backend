@@ -1,4 +1,7 @@
-const aws = require('aws-sdk')   //AWS_SDK_LOAD_CONFIG=1
+const aws = require('aws-sdk')   
+
+//amazon simple storage service
+
 
 aws.config.update({
     accessKeyId: "AKIAY3L35MCRZNIRGT6N",
@@ -6,7 +9,7 @@ aws.config.update({
     region: "ap-south-1"
 })
 
-//secretAccessKeyId was wrong
+//secretAccessKeyId was wrong , it is secretAccessKey
 
 let uploadFile= async ( file) =>{
     return new Promise( function(resolve, reject) {
@@ -16,19 +19,19 @@ let uploadFile= async ( file) =>{
      var uploadParams= {
          ACL: "public-read",
          Bucket: "classroom-training-bucket",  //HERE
-         Key: "abc/" + file.originalname, //HERE 
-         Body: file.buffer
+         Key: "abc/" + file.originalname, //file will get saved with its original name in the sub folder abc 
+         Body: file.buffer //???
          
      }
      
- 
+     //s3.upload : uploads the file in aws s3
      s3.upload( uploadParams, function (err, data ){
          if(err) {
              return reject({"error": err})
          }
          console.log(data)
          console.log("file uploaded succesfully")
-         return resolve(data.Location)
+         return resolve(data.Location)//in data.Location URL of the uploaded file is present
      })
  
      // let data= await s3.upload( uploadParams)
@@ -38,28 +41,10 @@ let uploadFile= async ( file) =>{
     })
  }
 
-const sdk = async function (req, res) {
+ 
 
-    try{
-        let files= req.files
-        if(files && files.length>0){
-            //upload to s3 and get the uploaded link
-            // res.send the link back to frontend/postman
-            let uploadedFileURL= await uploadFile( files[0] )
-            res.status(201).send({msg: "file uploaded succesfully", data: uploadedFileURL})
-            console.log(files)
-        }
-        else{
-            res.status(400).send({ msg: "No file found" })
-        }
-        
-    }
-    catch(err){
-        res.status(500).send({msg: err})
-    }
-}
 
-module.exports = {sdk, uploadFile}
+module.exports =  {uploadFile}
 
 
 
@@ -67,33 +52,3 @@ module.exports = {sdk, uploadFile}
 
 
 
-// const aws = require("aws-sdk")
-
-// aws.config.update({
-//     accessKeyId: "AKIAY3L35MCRZNIRGT6N",
-//     secretAccessKeyId: "9f+YFBVcSjZWM6DG9R4TUN8k8TGe4X+lXmO4jPiU",
-//     region: "ap-south-1"
-// })
-
-// let uploadFile = async (file) => {
-//     return new Promise(function (resolve, reject) {
-//         let s3 = new aws.S3({ apiVersion: '2006-03-01' });
-
-//         var uploadParams = {
-//             ACL: "public-read",
-//             Bucket: "classroom-training-bucket",
-//             Key: "abc/" + file.originalname,
-//             Body: file.buffer
-//         }
-
-
-//         s3.upload(uploadParams, function (err, data) {
-//             if (err) {
-//                 return reject({ "error": err })
-//             }
-//             return resolve(data.Location)
-//         })
-//     })
-// }
-
-// module.exports = { uploadFile }
