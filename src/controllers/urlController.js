@@ -43,7 +43,17 @@ const shortURL = async function (req, res) {
         if (!isPresent(longUrl)) return res.status(400).send({ status: false, message: "long URL is mandatory" });
 
         if (!validURL.isUri(longUrl)) return res.status(400).send({ status: false, message: "long URL is invalid" });
+        
+        let options = {
+            method : "get",
+            url : longUrl
+        };
 
+        let result = await axios(options)
+        
+        let data = result.data
+        if(!data)return res.send("not working long url")
+        
         if (!isPresent(urlCode) || !isPresent(shortUrl)) {
             req.body.urlCode = shortId.generate().toLowerCase();
             req.body.shortUrl = baseUrl + "/" + req.body.urlCode;
