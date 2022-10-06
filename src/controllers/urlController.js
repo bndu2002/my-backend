@@ -60,16 +60,6 @@ const shortURL = async function (req, res) {
         }
 
         let findURL = await urlModel.findOne({ longUrl: longUrl }).select({ _id: 0, __v: 0 })
-        let cachedURL = await GET_ASYNC(`${longUrl}`)
-
-        console.log(cachedURL)
-
-        if (cachedURL !== null ) {
-          return res.status(409).send({ status: false, message: "long URL already exists", data: JSON.parse(cachedURL)})
-        } else {
-            await SET_ASYNC(`${longUrl}`, JSON.stringify(findURL));
-
-        }
 
         if (!findURL) {
 
@@ -85,6 +75,44 @@ const shortURL = async function (req, res) {
             return res.status(201).send({ status: true, message: "successfully shortend", data: createURL })
 
         }
+
+        //findURL["class"] = "something"
+
+        let cachedURL = await GET_ASYNC((`${longUrl}`))
+
+        console.log("......", cachedURL)
+
+        if (cachedURL) {
+
+            return res.status(409).send({ status: false, message: "long URL already exists0", data: JSON.parse(cachedURL) })
+        } else {
+            await SET_ASYNC(`${longUrl}`, JSON.stringify(findURL));
+
+            return res.status(409).send({ status: false, message: "long URL already exists1", data: findURL })
+        }
+
+
+        // if (!cachedURL ) {
+        //     await SET_ASYNC(`${longUrl}`, JSON.stringify(findURL));
+        //     console.log(findURL)
+        //     return res.status(409).send({ status: false, message: "long URL already exists1", data: JSON.parse(cachedURL)})
+
+        // }
+
+        // if (!findURL) {
+
+        //     let url = await urlModel.create(req.body)
+
+        //     let createURL = {
+        //         urlCode: url.urlCode,
+        //         longUrl: url.longUrl,
+        //         shortUrl: url.shortUrl
+
+        //     }
+
+        //     return res.status(201).send({ status: true, message: "successfully shortend", data: createURL })
+
+        // }
 
 
 
@@ -115,7 +143,8 @@ const redirectURL = async function (req, res) {
         } else {
             let findUrlCode = await urlModel.findOne({ urlCode: urlCode });
             if (!findUrlCode) return res.status(404).send({ status: false, message: "Url Code Does Not Exist" });
-            await SET_ASYNC(`${urlCode}`, JSON.stringify(findUrlCode))
+            await SET_ASYNC(`${urlCode}`, JSON.stringify(findUrlCode));
+            // return res.status(200).send({status:false , message : "successfully set in cache"})//saptrishi mentor
         }
 
     } catch (error) {
