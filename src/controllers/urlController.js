@@ -1,20 +1,17 @@
 const urlModel = require("../models/urlModel");
 const shortId = require('shortid');
-const validURL = require('valid-url');
 const { isPresent } = require('../validator/validator');
 const redis = require("redis");
-const axios = require('axios')
-
 const { promisify } = require("util");
-const { json } = require("express");
 
-//Connect to redis
+
+//Connect to redis : in memory data store or database we are using for cache
 const redisClient = redis.createClient(
-    13190,
-    "redis-13190.c301.ap-south-1-1.ec2.cloud.redislabs.com",
+    18427,
+    "redis-18427.c212.ap-south-1-1.ec2.cloud.redislabs.com",
     { no_ready_check: true }
 );
-redisClient.auth("gkiOIPkytPI3ADi14jHMSWkZEo2J5TDG", function (err) {
+redisClient.auth("hAQL16ypUmdfadtiFMu4XPl2EVFtGUie", function (err) {
     if (err) throw err;
 });
 
@@ -29,8 +26,10 @@ redisClient.on("connect", async function () {
 
 //Connection setup for redis
 
+//promisification of callback func + binding it with our redis account/connection
+// if not bind : "Cannot read property 'internal_send_command' of undefined" 
 const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
-const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
+const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);//return true if not promisified
 
 
 
@@ -51,9 +50,6 @@ const shortURL = async function (req, res) {
         if (!isValidUrl(longUrl)) return res.status(400).send({ status: false, message: "long URL is invalid" });
 
 
-
-
-
         if (!isPresent(urlCode) || !isPresent(shortUrl)) {
             req.body.urlCode = shortId.generate().toLowerCase();
             req.body.shortUrl = baseUrl + "/" + req.body.urlCode;
@@ -69,55 +65,23 @@ const shortURL = async function (req, res) {
                 urlCode: url.urlCode,
                 longUrl: url.longUrl,
                 shortUrl: url.shortUrl
-
             }
-
+            await SET_ASYNC(urlCode.toLowerCase(),longUrl)
             return res.status(201).send({ status: true, message: "successfully shortend", data: createURL })
-
         }
+       // return res.status(201).send({ status: true, message: "long URL already exists (from db)", data: findURL })
 
-        //findURL["class"] = "something"
-
+        //caching data : storing data that is frequently asked + requires low latency , in a temporary database (here redis)
+        // cache : for duplicacy of long url , response from cache
         let cachedURL = await GET_ASYNC((`${longUrl}`))
 
-        console.log("......", cachedURL)
-
+        //console.log("......", cachedURL)
         if (cachedURL) {
-
-            return res.status(409).send({ status: false, message: "long URL already exists0", data: JSON.parse(cachedURL) })
+            return res.status(201).send({ status: true, message: "long URL already exists (from cache)", data: JSON.parse(cachedURL) })
         } else {
             await SET_ASYNC(`${longUrl}`, JSON.stringify(findURL));
-
-            return res.status(409).send({ status: false, message: "long URL already exists1", data: findURL })
+            return res.status(201).send({ status: true, message: "long URL already exists (from db)", data: findURL })
         }
-
-
-        // if (!cachedURL ) {
-        //     await SET_ASYNC(`${longUrl}`, JSON.stringify(findURL));
-        //     console.log(findURL)
-        //     return res.status(409).send({ status: false, message: "long URL already exists1", data: JSON.parse(cachedURL)})
-
-        // }
-
-        // if (!findURL) {
-
-        //     let url = await urlModel.create(req.body)
-
-        //     let createURL = {
-        //         urlCode: url.urlCode,
-        //         longUrl: url.longUrl,
-        //         shortUrl: url.shortUrl
-
-        //     }
-
-        //     return res.status(201).send({ status: true, message: "successfully shortend", data: createURL })
-
-        // }
-
-
-
-        //409 : conflict with db
-        //return res.status(409).send({ status: true, message: "long URL already exists 2 ", data: findURL })
 
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
@@ -135,16 +99,17 @@ const redirectURL = async function (req, res) {
         //how to print this message ?
         if (!urlCode) return res.status(400).send({ status: false, message: "provide urlCode" });
 
-        let cachedURL = await GET_ASYNC(`${urlCode}`)
+        let cachedURL = await GET_ASYNC(urlCode.toLowerCase())
 
-        console.log(cachedURL)
+        console.log(".....", cachedURL)
         if (cachedURL) {
+            console.log("hiii")
             return res.redirect(cachedURL)
         } else {
             let findUrlCode = await urlModel.findOne({ urlCode: urlCode });
             if (!findUrlCode) return res.status(404).send({ status: false, message: "Url Code Does Not Exist" });
-            await SET_ASYNC(`${urlCode}`, JSON.stringify(findUrlCode));
-            // return res.status(200).send({status:false , message : "successfully set in cache"})//saptrishi mentor
+            await SET_ASYNC(`${urlCode}`, JSON.stringify(findUrlCode))
+            return res.redirect(findUrlCode.longUrl)//saptrishi mentor
         }
 
     } catch (error) {
