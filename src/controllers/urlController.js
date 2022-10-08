@@ -1,6 +1,6 @@
 const urlModel = require("../models/urlModel");
 const shortId = require('shortid');
-const { isPresent } = require('../validator/validator');
+const { isPresent, isValidUrl } = require('../validator/validator');
 const redis = require("redis");
 const { promisify } = require("util");
 
@@ -42,13 +42,7 @@ const shortURL = async function (req, res) {
 
         if (!isPresent(longUrl)) return res.status(400).send({ status: false, message: "long URL is mandatory" });
 
-        function isValidUrl(string) {
-            const pattern = (/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/gm);
-            return pattern.test(string);
-        }
-
         if (!isValidUrl(longUrl)) return res.status(400).send({ status: false, message: "long URL is invalid" });
-
 
         if (!isPresent(urlCode) || !isPresent(shortUrl)) {
             req.body.urlCode = shortId.generate().toLowerCase();
@@ -66,29 +60,17 @@ const shortURL = async function (req, res) {
                 longUrl: url.longUrl,
                 shortUrl: url.shortUrl
             }
-            await SET_ASYNC(urlCode.toLowerCase(),longUrl)
+            await SET_ASYNC(`${longUrl}`, JSON.stringify(url))
             return res.status(201).send({ status: true, message: "successfully shortend", data: createURL })
         }
-       // return res.status(201).send({ status: true, message: "long URL already exists (from db)", data: findURL })
+        return res.status(201).send({ status: true, message: "long URL already exists (from db)", data: findURL })
 
         //caching data : storing data that is frequently asked + requires low latency , in a temporary database (here redis)
-        // cache : for duplicacy of long url , response from cache
-        let cachedURL = await GET_ASYNC((`${longUrl}`))
-
-        //console.log("......", cachedURL)
-        if (cachedURL) {
-            return res.status(201).send({ status: true, message: "long URL already exists (from cache)", data: JSON.parse(cachedURL) })
-        } else {
-            await SET_ASYNC(`${longUrl}`, JSON.stringify(findURL));
-            return res.status(201).send({ status: true, message: "long URL already exists (from db)", data: findURL })
-        }
-
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
     }
 
 }
-
 
 
 const redirectURL = async function (req, res) {
@@ -99,7 +81,7 @@ const redirectURL = async function (req, res) {
         //how to print this message ?
         if (!urlCode) return res.status(400).send({ status: false, message: "provide urlCode" });
 
-        let cachedURL = await GET_ASYNC(urlCode.toLowerCase())
+        let cachedURL = await GET_ASYNC(`${urlCode}`)
 
         console.log(".....", cachedURL)
         if (cachedURL) {
