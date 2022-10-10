@@ -1,23 +1,28 @@
-const express=require('express')
-const mongoose=require('mongoose')
-const route=require('./routes/route')
+const express = require('express');
+const route = require('./routes/route.js');
+const mongoose = require('mongoose');
+const app = express();
+const multer = require('multer')
+const PORT = process.env.PORT || 3000
 
-const app=express()
+app.use(express.json());//makes sure data present in req.body is in JSON format,application level middleware
 
-app.use(express.json())
+app.use(multer().any())
 
-mongoose.connect('mongodb+srv://vandana:7CJBNDDwPorDTTrX@cluster0.crrs6th.mongodb.net/group59Database',{
-    useNewUrlParser:true
+
+
+
+
+mongoose.connect("mongodb+srv://vandana:7CJBNDDwPorDTTrX@cluster0.crrs6th.mongodb.net/group59Database", {
+    useNewUrlParser: true
 })
-    .then(()=>{console.log('mongoDb is connected')})
-    .catch((err)=>{console.log(err)})
+    .then(() => console.log("MongoDb is connected"),
+        err => console.log(err))
 
-app.use('/',route)
 
-app.use(function(req,res){
-    return res.status(400).send({status:false,msg:'Invalid Url'})
-})
+app.use('/', route);
 
-app.listen(3000,function(){
-    console.log('Express app is connected '+ 3000)
-})
+
+app.listen(PORT, function () {
+    console.log('Express app running on port ' + PORT)
+});
