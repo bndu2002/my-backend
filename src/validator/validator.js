@@ -2,7 +2,11 @@ const isValidMail = (/^([0-9a-zA-Z]([-_\\.]*[0-9a-zA-Z]+)*)@([a-z]([-_\\.]*[a-z]
 
 const isValidName = (/^[a-zA-Z ]*$/)
 
-const isvalidPassword = (/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/)
+const isValidPassword = (/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/)
+
+const isValidPincode = (/^\d{3}\s?\d{3}$/)
+
+const isValidNumber = (/^[6-9][0-9]{9}$/)
 
 const isValidRequestBody = (value) => {
     return Object.keys(value).length > 0
@@ -14,6 +18,6 @@ const isPresent = (value) => {
     return true
 }
 
-const isValidNumber = (/^[6-9][0-9]{9}$/)
 
-module.exports = { isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isvalidPassword }
+
+module.exports = {isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword }
