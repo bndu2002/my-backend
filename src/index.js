@@ -26,3 +26,6 @@ app.use('/', route);
 app.listen(PORT, function () {
     console.log('Express app running on port ' + PORT)
 });
+
+
+// https://www.makeuseof.com/nodejs-bcrypt-hash-verify-salt-password/
