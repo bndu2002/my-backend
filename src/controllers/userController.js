@@ -1,5 +1,5 @@
 const userModel = require('../models/userModel');
-const {isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword } = require('../validator/validator')
+const { isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword } = require('../validator/validator')
 const bcrypt = require("bcrypt")
 const { uploadFile } = require('../controllers/awsController');
 
@@ -35,7 +35,7 @@ const createUser = async function (req, res) {
 
         let profileImage = req.files
 
-        if(profileImage && profileImage.length > 0) {
+        if (profileImage && profileImage.length > 0) {
             let uploadedFileURL = await uploadFile(profileImage[0])
             //profileImage was available in req.files ; added new key in req.body.profileImage = uploadedFileURL
             req.body.profileImage = uploadedFileURL
@@ -203,37 +203,51 @@ const updateuser = async (req, res) => {
         //password = hashedPassword
     }
 
-    if (isPresent(profileImage)){
-        console.log(typeof(profileImage))
+    if (isPresent(profileImage)) {
+        console.log(typeof (profileImage))
         if (!profileImage.length > 0) {
             return res.send("no file found")
-        } else{
-        let uploadedFileURL = await uploadFile(profileImage[0])
-        req.body.profileImage = uploadedFileURL}
+        } else {
+            let uploadedFileURL = await uploadFile(profileImage[0])
+            req.body.profileImage = uploadedFileURL
+        }
     }
 
     //let { shipping, billing } = address
-    
-    let updateAddress = {}
+
+    let updateAddress = fetchUser.address
+    //console.log(address)
+
     if (address) {
+
         let { shipping, billing } = address
         if (shipping) {
-            if (shipping.city && !isValidName.test(shipping.city))
-                return res.status(400).send({ status: false, message: "Enter A Valid City" })
-            updateAddress["address.shipping.city"] = address.shipping.city
+            if (shipping.city) {
+                if (!isValidName.test(shipping.city))
+                    return res.status(400).send({ status: false, message: "Enter A Valid City" })
+                updateAddress['shipping.city'] = address.shipping.city
+            }
+
             if (shipping.pincode && !isValidPincode.test(shipping.pincode))
                 return res.status(400).send({ status: false, message: "Enter A Valid Pincode" })
-            updateAddress["address.shipping.pincode"] = address.shipping.pincode
-        }
+            updateAddress['shipping.pincode'] = address.shipping.pincode
 
+        }
+        console.log("here", address)
         if (billing) {
             if (billing.city && !isValidName.test(billing.city))
                 return res.status(400).send({ status: false, message: "Enter A Valid City" })
+            updateAddress['billing.city'] = address.billing.city
             if (billing.pincode && !isValidPincode.test(billing.pincode))
                 return res.status(400).send({ status: false, message: "Enter A Valid Pincode" })
+            updateAddress['billing.pincode'] = address.billing.pincode
         }
-    }
 
+    }
+    //req.body.address = updateAddress
+    //console.log(updateAddress)
+
+    //updateAddress['address'] = fetchUser.address
 
     // if (address) {
     //     if (address.shipping) {
@@ -278,26 +292,35 @@ const updateuser = async (req, res) => {
     //     }
     // }
 
-    let data = {
-        fname: fname,
-        lname: lname,
-        email: email,
-        phone: phone,
-        password: hashedPassword,
-        profileImage: req.body.profileImage,
-        address: updateAddress
+    // let data = {
+    //     fname: fname,
+    //     lname: lname,
+    //     email: email,
+    //     phone: phone,
+    //     password: hashedPassword,
+    //     profileImage: req.body.profileImage,
+    //     address: updateAddress
 
-    }
+    // }
 
-   
-    
-   let updateuser = await userModel.findOneAndUpdate(
+    //console.log(data)
+    //address = updateAddress
+    console.log(req.body.address)
+    let updateuser = await userModel.findOneAndUpdate(
         { _id: userId },
-        data,
+        {
+            fname: fname,
+            lname: lname,
+            email: email,
+            phone: phone,
+            password: hashedPassword,
+            profileImage: req.body.profileImage,
+            address: updateAddress
+        },
         { new: true }
 
     )
-
+    console.log("dekh", address)
     return res.send({ status: true, message: "updated user successfully", data: updateuser })
 
 }

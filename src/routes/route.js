@@ -14,7 +14,9 @@ router.get('/user/:userId/profile',middleware.authentication,userController.getU
 router.put('/user/:userId/profile',middleware.authentication,userController.updateuser);
 
 //Product API's
-router.post('/products',productController.createProduct)
+router.post('/products',productController.createProduct);
+
+router.get('/products/:productId',productController.getProduct)
 
 
 

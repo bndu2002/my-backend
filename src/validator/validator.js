@@ -1,3 +1,5 @@
+let mongoose = require('mongoose')
+
 const isValidMail = (/^([0-9a-zA-Z]([-_\\.]*[0-9a-zA-Z]+)*)@([a-z]([-_\\.]*[a-z]+)*)[\\.]([a-z]{2,9})+$/);
 
 const isValidName = (/^[a-zA-Z ]*$/)
@@ -21,10 +23,8 @@ const isPresent = (value) => {
     return true
 }
 
-// const isValid = function (value) {
-//     if (typeof value === 'undefined' || value === null) return false
-//     if (typeof value === 'string' && value.trim().length === 0) return false
-//     return true;
-// }
+const isValidObjectId = (ObjectId) => {
+    return mongoose.Types.ObjectId.isValid(ObjectId)
+}
 
-module.exports = {isValidTitle,isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword }
+module.exports = {isValidObjectId,isValidTitle,isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword }
