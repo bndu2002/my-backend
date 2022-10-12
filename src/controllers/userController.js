@@ -1,5 +1,5 @@
 const userModel = require('../models/userModel');
-const { isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword } = require('../validator/validator')
+const { isValid, isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword } = require('../validator/validator')
 const bcrypt = require("bcrypt")
 const { uploadFile } = require('../controllers/awsController');
 const { json } = require('express');
@@ -35,7 +35,7 @@ const createUser = async function (req, res) {
 
         let profileImage = req.files
 
-        if (profileImage && profileImage.length > 0) {
+        if(profileImage && profileImage.length > 0) {
             let uploadedFileURL = await uploadFile(profileImage[0])
             //profileImage was available in req.files ; added new key in req.body.profileImage = uploadedFileURL
             req.body.profileImage = uploadedFileURL
@@ -91,16 +91,16 @@ const loginUser = async function (req, res) {
 
         let email = req.body.email
         let password = req.body.password;
-     
+
         if (!email || !password) return res.status(400).send({ status: false, message: "Email and Password are required" })
-        
+
         let findUser = await userModel.findOne({ email: email })
-        
-        if(!findUser)return res.status(404).send({ status: false, message: "User not found" })
-        
+
+        if (!findUser) return res.status(404).send({ status: false, message: "User not found" })
+
         let checkPassword = await bcrypt.compare(password, findUser.password)
-        
-        if(!checkPassword)return res.status(404).send({ status: false, message: "Incorrect Password" })
+
+        if (!checkPassword) return res.status(404).send({ status: false, message: "Incorrect Password" })
         //if (!findUser || !checkPassword) return res.status(404).send({ status: false, message: "User not found" });
 
         let token = jwt.sign(
@@ -159,12 +159,12 @@ const updateuser = async (req, res) => {
     if (fetchUser._id != req.token.userId) return res.status(403).send({ status: false, msg: "Unauthorized User" })
 
     let { fname, lname, email, phone, password, address } = req.body
-     
+
     let profileImage = req.files
-    console.log("yha se" ,profileImage)
+    console.log("yha se", profileImage)
     if (!isValidRequestBody(req.body) && !isPresent(profileImage)) return res.status(400).send({ status: false, message: "body cannot be empty" })
 
-    if (isPresent(fname)){
+    if (isPresent(fname)) {
         if (!isValidName.test(fname))
             return res.status(400).send({ status: false, message: "Enter A Valid Fname" })
     }
@@ -182,8 +182,8 @@ const updateuser = async (req, res) => {
     }
     console.log("hiii")
 
-    if (phone){
-        
+    if (phone) {
+
         console.log("truuu")
         if (!isValidNumber.test(phone))
             return res.status(400).send({ status: false, message: "Enter A Valid Phone Number" })
@@ -194,7 +194,7 @@ const updateuser = async (req, res) => {
     console.log("hlooo")
     let hashedPassword;
 
-    if(isPresent(password)){
+    if (isPresent(password)) {
         console.log("dekh")
         if (!isValidPassword.test(password))
             return res.status(400).send({ status: false, message: "Enter A Valid Password" })
@@ -203,26 +203,27 @@ const updateuser = async (req, res) => {
         //password = hashedPassword
     }
 
-
-      
-
-    if (isPresent(profileImage)) {
-        console.log("210" , profileImage)
-        if (!profileImage.length > 0)
-            return res.status(400).send({ status: false, message: "No File Found" })
+    if (isPresent(profileImage)){
+        console.log(typeof(profileImage))
+        if (!profileImage.length > 0) {
+            return res.send("no file found")
+        } else{
         let uploadedFileURL = await uploadFile(profileImage[0])
-        req.body.profileImage = uploadedFileURL
+        req.body.profileImage = uploadedFileURL}
     }
-    
-    //let { shipping, billing } = address
 
+    //let { shipping, billing } = address
+    
+    let updateAddress = {}
     if (address) {
         let { shipping, billing } = address
         if (shipping) {
             if (shipping.city && !isValidName.test(shipping.city))
                 return res.status(400).send({ status: false, message: "Enter A Valid City" })
+            updateAddress["address.shipping.city"] = address.shipping.city
             if (shipping.pincode && !isValidPincode.test(shipping.pincode))
                 return res.status(400).send({ status: false, message: "Enter A Valid Pincode" })
+            updateAddress["address.shipping.pincode"] = address.shipping.pincode
         }
 
         if (billing) {
@@ -232,7 +233,51 @@ const updateuser = async (req, res) => {
                 return res.status(400).send({ status: false, message: "Enter A Valid Pincode" })
         }
     }
-    //let formData = new FormData();
+
+
+    // if (address) {
+    //     if (address.shipping) {
+    //         if (address.shipping.street) {
+    //             if (!isPresent(address.shipping.street)) {
+    //                 return res.status(400).send({ status: false, message: 'Please provide street to update' })
+    //             }
+    //             updateAddress['address.shipping.street'] = address.shipping.street
+    //         }
+    //         if (address.shipping.city) {
+    //             if (!isPresent(address.shipping.city)) {
+    //                 return res.status(400).send({ status: false, message: 'Please provide city name to update' })
+    //             }
+    //             updateAddress['address.shipping.city'] = address.shipping.city
+    //         }
+    //         if (address.shipping.pincode) {
+    //             // if (typeof address.shipping.pincode !== 'number') {
+    //             //     return res.status(400).send({ status: false, message: 'Please provide pincode to update' })
+    //             // }
+    //             updateAddress['address.shipping.pincode'] = address.shipping.pincode
+    //         }
+    //     }
+    //     if (address.billing) {
+    //         if (address.billing.street) {
+    //             if (!isPresent(address.billing.street)) {
+    //                 return res.status(400).send({ status: false, message: 'Please provide street to update' })
+    //             }
+    //             updateAddress['address.billing.street'] = address.billing.street
+    //         }
+    //         if (address.billing.city) {
+    //             if (!isPresent(address.billing.city)) {
+    //                 return res.status(400).send({ status: false, message: 'Please provide city to update' })
+    //             }
+    //             updateAddress['address.billing.city'] = address.billing.city
+    //         }
+    //         if (address.billing.pincode) {
+    //             if (typeof address.billing.pincode !== 'number') {
+    //                 return res.status(400).send({ status: false, message: 'Please provide pincode to update' })
+    //             }
+    //             updateAddress['address.billing.pincode'] = address.billing.pincode
+    //         }
+    //     }
+    // }
+
     let data = {
         fname: fname,
         lname: lname,
@@ -240,11 +285,13 @@ const updateuser = async (req, res) => {
         phone: phone,
         password: hashedPassword,
         profileImage: req.body.profileImage,
-        address: address
+        address: updateAddress
 
     }
 
-    let updateuser = await userModel.findOneAndUpdate(
+   
+    
+   let updateuser = await userModel.findOneAndUpdate(
         { _id: userId },
         data,
         { new: true }
@@ -254,5 +301,143 @@ const updateuser = async (req, res) => {
     return res.send({ status: true, message: "updated user successfully", data: updateuser })
 
 }
+
+// const updateuser = async function (req, res) {
+//     try {
+//         const requestBody = req.body
+//         let userId = req.params.userId
+//         // if (!validObject(userId)) {
+//         //     res.status(400).send({ status: false, message: `${userId} is invalid` })
+//         //     return
+//         // }
+//         const userFound = await userModel.findOne({ _id: userId })
+//         if (!userFound) {
+//             return res.status(404).send({ status: false, message: `User do not exists` })
+//         }
+//         //Authorisation
+//         if (userId.toString() !== req.token.userId) {
+//             res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
+//             return
+//         }
+//         if (!isValidRequestBody(requestBody)) {
+//             res.status(400).send({ status: false, message: 'Please provide details to update' })
+//             return
+//         }
+//         // destructuring the body
+//         let { fname, lname, email, phone, password, address } = requestBody;
+//         let updateUserData = {}
+//         if (isPresent(fname)) {
+//             updateUserData['fname'] = fname
+//         }
+//         if (isPresent(lname)) {
+//             updateUserData['lname'] = lname
+//         }
+//         if (isPresent(email)) {
+//             if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.trim()))) {
+//                 res.status(400).send({ status: false, message: `Email should be a valid email address` })
+//             }
+//             const duplicateEmail = await userModel.find({ email: email })
+//             if (duplicateEmail.length) {
+//                 res.status(400).send({ status: false, message: 'email already exists' })
+//             }
+//             updateUserData['email'] = email
+//         }
+//         if (isPresent(phone)) {
+//             if (!(/^(1\s|1|)?((\(\d{3}\))|\d{3})(\-|\s)?(\d{3})(\-|\s)?(\d{4})$/.test(phone.trim()))) {
+//                 res.status(400).send({ status: false, message: `Please provide valid phone number` })
+//             }
+//             const duplicatePhone = await userModel.find({ phone: phone })
+//             if (duplicatePhone.length) {
+//                 res.status(400).send({ status: false, message: 'phone already exists' })
+//             }
+//             updateUserData['phone'] = phone
+//         }
+//         if (isValid(password)) {
+//             console.log("hlooo")
+//             const encrypt = await bcrypt.hash(password, 10)
+//             updateUserData['password'] = encrypt
+//         }
+//         if (address) {
+//             if (address.shipping) {
+//                 if (address.shipping.street) {
+//                     if (!isPresent(address.shipping.street)) {
+//                         return res.status(400).send({ status: false, message: 'Please provide street to update' })
+//                     }
+//                     updateUserData['address.shipping.street'] = address.shipping.street
+//                 }
+//                 if (address.shipping.city) {
+//                     if (!isPresent(address.shipping.city)) {
+//                         return res.status(400).send({ status: false, message: 'Please provide city name to update' })
+//                     }
+//                     updateUserData['address.shipping.city'] = address.shipping.city
+//                 }
+//                 if (address.shipping.pincode) {
+//                     if (typeof address.shipping.pincode !== 'number') {
+//                         return res.status(400).send({ status: false, message: 'Please provide pincode to update' })
+//                     }
+//                     updateUserData['address.shipping.pincode'] = address.shipping.pincode
+//                 }
+//             }
+//             if (address.billing) {
+//                 if (address.billing.street) {
+//                     if (!isPresent(address.billing.street)) {
+//                         return res.status(400).send({ status: false, message: 'Please provide street to update' })
+//                     }
+//                     updateUserData['address.billing.street'] = address.billing.street
+//                 }
+//                 if (address.billing.city) {
+//                     if (!isPresent(address.billing.city)) {
+//                         return res.status(400).send({ status: false, message: 'Please provide city to update' })
+//                     }
+//                     updateUserData['address.billing.city'] = address.billing.city
+//                 }
+//                 if (address.billing.pincode) {
+//                     if (typeof address.billing.pincode !== 'number') {
+//                         return res.status(400).send({ status: false, message: 'Please provide pincode to update' })
+//                     }
+//                     updateUserData['address.billing.pincode'] = address.billing.pincode
+//                 }
+//             }
+//         }
+//         // aws.config.update({
+//         //     accessKeyId: "AKIAY3L35MCRRMC6253G",  // id
+//         //     secretAccessKey: "88NOFLHQrap/1G2LqUy9YkFbFRe/GNERsCyKvTZA",  // like your secret password
+//         //     region: "ap-south-1" // Mumbai region
+//         // });
+//         // // this function uploads file to AWS and gives back the url for the file
+//         // let uploadFile = async (file) => {
+//         //     return new Promise(function (resolve, reject) { // exactly 
+//         //         // Create S3 service object
+//         //         let s3 = new aws.S3({ apiVersion: "2006-03-01" });
+//         //         var uploadParams = {
+//         //             ACL: "public-read", // this file is publically readable
+//         //             Bucket: "classroom-training-bucket", // HERE
+//         //             Key: "pk_newFolder/profileimages" + file.originalname, // HERE    "pk_newFolder/harry-potter.png" pk_newFolder/harry-potter.png
+//         //             Body: file.buffer,
+//         //         };
+//         //         // Callback - function provided as the second parameter ( most oftenly)
+//         //         s3.upload(uploadParams, function (err, data) {
+//         //             if (err) {
+//         //                 return reject({ "error": err });
+//         //             }
+//         //             console.log(data)
+//         //             console.log(`File uploaded successfully. ${data.Location}`);
+//         //             return resolve(data.Location); //HERE 
+//         //         });
+//         //     });
+//         // };
+//         let profileImage = req.files;
+//         if (profileImage && profileImage.length > 0) {
+//             let uploadedFileURL = await uploadFile(profileImage[0]);
+//             if (uploadedFileURL) {
+//                 updateUserData['profileImage'] = uploadedFileURL
+//             }
+//         }
+//         const updatedUserData = await userModel.findOneAndUpdate({ _id: userId }, updateUserData, { new: true })
+//         return res.status(201).send({ status: true, data: updatedUserData })
+//     } catch (error) {
+//         return res.status(500).send({ status: false, msg: error.message });
+//     }
+// }
 
 module.exports = { createUser, loginUser, getUser, updateuser }
