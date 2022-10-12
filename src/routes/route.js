@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router();
 const userController = require('../controllers/userController');
+const productController = require('../controllers/productController')
 const middleware = require('../middleware/auth')
 
 
@@ -11,6 +12,9 @@ router.post('/login',userController.loginUser);
 router.get('/user/:userId/profile',middleware.authentication,userController.getUser);
 
 router.put('/user/:userId/profile',middleware.authentication,userController.updateuser);
+
+//Product API's
+router.post('/products',productController.createProduct)
 
 
 

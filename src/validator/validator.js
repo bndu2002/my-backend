@@ -2,6 +2,8 @@ const isValidMail = (/^([0-9a-zA-Z]([-_\\.]*[0-9a-zA-Z]+)*)@([a-z]([-_\\.]*[a-z]
 
 const isValidName = (/^[a-zA-Z ]*$/)
 
+const isValidTitle = (/^[a-zA-Z0-9,-. ]*$/)
+
 const isValidPassword = (/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/)
 
 const isValidPincode = (/^\d{3}\s?\d{3}$/)
@@ -15,14 +17,14 @@ const isValidRequestBody = (value) => {
 const isPresent = (value) => {
     if (typeof value === "undefined" || value === null) return false
     if (typeof value === "string" && value.trim().length === 0) return false//.trim() :remove spaces, should not mistake empty space as value
-    if(typeof value === "object" && value.length === 0)return false
+   
     return true
 }
 
-const isValid = function (value) {
-    if (typeof value === 'undefined' || value === null) return false
-    if (typeof value === 'string' && value.trim().length === 0) return false
-    return true;
-}
+// const isValid = function (value) {
+//     if (typeof value === 'undefined' || value === null) return false
+//     if (typeof value === 'string' && value.trim().length === 0) return false
+//     return true;
+// }
 
-module.exports = {isValid,isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword }
+module.exports = {isValidTitle,isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword }
