@@ -62,9 +62,9 @@ const createProduct = async function (req, res) {
         // }
 
         console.log(availableSizes)
-
-        availableSizes = availableSizes.split(",")
         if (!isPresent(availableSizes)) return res.send("End")
+        availableSizes = availableSizes.split(",")
+
         for (let i = 0; i < availableSizes.length; i++) {
             if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes[i])))
                 return res.status(400).send({ status: false, message: "availableSizes is missing or invalid : provide  S, XS, M, X, L, XXL, XL " })
@@ -155,14 +155,11 @@ const getProduct = async function (req, res) {
     try {
         let productId = req.params.productId
 
-        if (!productId) return res.status(400).send({ status: false, message: "provide product id in params" })
-        //this msg will never get printed 106
-
         if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "product id is not valid" })
 
         let checkProduct = await productModel.findById(productId)
 
-        if (checkProduct.isDeleted == true) return res.status(404).send({ status: false, message: "Product Out Of Stock" })
+        if (checkProduct.isDeleted == true) return res.status(404).send({ status: false, message: "Product Is Out Of Stock" })
 
         if (!checkProduct) return res.status(404).send({ status: false, message: "product not found" })
 
@@ -217,9 +214,7 @@ const updateProduct = async function (req, res) {
     }
 
     if (productImage) {
-
         if (productImage.length > 0) {
-
             var uploadedFileURL = await uploadFile(productImage[0])
             //profileImage was available in req.files ; added new key in req.body.profileImage = uploadedFileURL
             req.body["productImage"] = uploadedFileURL

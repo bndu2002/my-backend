@@ -51,17 +51,32 @@ const createUser = async function (req, res) {
 
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        let { shipping, billing } = address
+        // let { shipping, billing } = address
+        // if (!shipping) return res.status(400).send({ status: false, message: "shipping - street,city,pincode ; are required" })
+        // if (!billing.street || !billing.city || !billing.pincode) return res.status(400).send({ status: false, message: "billing - street,city,pincode ; are required" })
 
-        if (!shipping.street || !shipping.city || !shipping.pincode) return res.status(400).send({ status: false, message: "shipping - street,city,pincode ; are required" })
+        if (!address) {
+            return res.status(400).send({ status: false, message: "address is required" })
+        }
+        // let { shipping, billing } = address
+        if (!address.shipping) {
+            return res.status(400).send({ status: false, message: "shipping is required" })
+        }
 
-        if (!billing.street || !billing.city || !billing.pincode) return res.status(400).send({ status: false, message: "billing - street,city,pincode ; are required" })
+        if (!address.shipping.street || !address.shipping.city || !address.shipping.pincode) return res.status(400).send({ status: false, message: "shipping - street,city,pincode ; are required" })
 
-        if (!isValidPincode.test(shipping.pincode) || !isValidPincode.test(billing.pincode)) {
+        if (!address.billing) {
+            return res.status(400).send({ status: false, message: "billing is required" })
+        }
+
+        if (!address.billing.street || !address.billing.city || !address.billing.pincode) return res.status(400).send({ status: false, message: "billing - street,city,pincode ; are required" })
+
+
+        if (!isValidPincode.test(address.shipping.pincode) || !isValidPincode.test(address.billing.pincode)) {
             return res.status(400).send({ status: false, message: "Enter A Valid Pincode" })
         }
 
-        if (!isValidName.test(shipping.city) || !isValidName.test(billing.city)) {
+        if (!isValidName.test(address.shipping.city) || !isValidName.test(address.billing.city)) {
             return res.status(400).send({ status: false, message: "Enter A Valid City" })
         }
 
@@ -147,182 +162,189 @@ const getUser = async function (req, res) {
 }
 
 const updateuser = async (req, res) => {
-    let userId = req.params.userId
+    try {
+        let userId = req.params.userId
+        //let body = req.body
+        if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "UserId Is Invalid" })
 
-    if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "UserId Is Invalid" })
+        const fetchUser = await userModel.findById({ _id: userId })
 
-    const fetchUser = await userModel.findById({ _id: userId })
+        if (!fetchUser) return res.status(404).send({ status: false, message: "User Not Found" })
 
-    if (!fetchUser) return res.status(404).send({ status: false, message: "User Not Found" })
+        //Authorization Check
+        if (fetchUser._id != req.token.userId) return res.status(403).send({ status: false, msg: "Unauthorized User" })
 
-    //Authorization Check
-    if (fetchUser._id != req.token.userId) return res.status(403).send({ status: false, msg: "Unauthorized User" })
+        let { fname, lname, email, phone, password, address } = req.body
 
-    let { fname, lname, email, phone, password, address } = req.body
+        let profileImage = req.files
 
-    let profileImage = req.files
-    console.log("yha se", profileImage)
-    if (!isValidRequestBody(req.body) && !isPresent(profileImage)) return res.status(400).send({ status: false, message: "body cannot be empty" })
+        if (!isValidRequestBody(req.body) && !isPresent(profileImage)) return res.status(400).send({ status: false, message: "body cannot be empty" })
 
-    if (isPresent(fname)) {
-        if (!isValidName.test(fname))
-            return res.status(400).send({ status: false, message: "Enter A Valid Fname" })
-    }
+        if (isPresent(fname)) {
+            if (!isValidName.test(fname))
+                return res.status(400).send({ status: false, message: "Enter A Valid Fname" })
+        }
 
-    if (lname) {
-        if (!isValidName.test(lname))
-            return res.status(400).send({ status: false, message: "Enter A Valid Lname" })
-    }
+        if (lname) {
+            if (!isValidName.test(lname))
+                return res.status(400).send({ status: false, message: "Enter A Valid Lname" })
+        }
 
-    if (email) {
-        if (!isValidMail.test(email))
-            return res.status(400).send({ status: false, message: "Enter A Valid Email" })
-        let repeatedEmail = await userModel.findOne({ email: email })
-        if (repeatedEmail) return res.status(400).send({ status: false, message: `${email} Already In Use` })
-    }
-    console.log("hiii")
+        if (email) {
+            if (!isValidMail.test(email))
+                return res.status(400).send({ status: false, message: "Enter A Valid Email" })
+            let repeatedEmail = await userModel.findOne({ email: email })
+            if (repeatedEmail) return res.status(400).send({ status: false, message: `${email} Already In Use` })
+        }
+        console.log("hiii")
 
-    if (phone) {
+        if (phone) {
+            console.log("truuu")
+            if (!isValidNumber.test(phone))
+                return res.status(400).send({ status: false, message: "Enter A Valid Phone Number" })
+            let repeatedPhone = await userModel.findOne({ phone: phone })
+            if (repeatedPhone) return res.status(400).send({ status: false, message: `${phone} Already In Use` })
+        }
 
-        console.log("truuu")
-        if (!isValidNumber.test(phone))
-            return res.status(400).send({ status: false, message: "Enter A Valid Phone Number" })
-        let repeatedPhone = await userModel.findOne({ phone: phone })
-        if (repeatedPhone) return res.status(400).send({ status: false, message: `${phone} Already In Use` })
-    }
+       
 
-    console.log("hlooo")
-    let hashedPassword;
 
-    if (isPresent(password)) {
-        console.log("dekh")
-        if (!isValidPassword.test(password))
-            return res.status(400).send({ status: false, message: "Enter A Valid Password" })
-        const salt = await bcrypt.genSalt(10);
-        hashedPassword = await bcrypt.hash(password, salt)
-        //password = hashedPassword
-    }
+        if (password) {
+            if (!isValidPassword.test(password)) {
+                return res.status(400).send({ status: false, message: "Enter A Valid Password" })
+            }
+            const salt = await bcrypt.genSalt(10);
+            let hashedPassword = await bcrypt.hash(password, salt)
+            req.body["password"] = hashedPassword
+        }
 
-    if (isPresent(profileImage)) {
-        console.log(typeof (profileImage))
-        if (!profileImage.length > 0) {
-            return res.send("no file found")
-        } else {
+        
+
+        //should not except empty profileimage to update?
+        if (profileImage && profileImage.length > 0) {
             let uploadedFileURL = await uploadFile(profileImage[0])
             req.body.profileImage = uploadedFileURL
         }
-    }
 
-    //let { shipping, billing } = address
+        let updateAddress = {}
+        //console.log(address)
 
-    let updateAddress = fetchUser.address
-    //console.log(address)
+        // if (address) {
+        //     let { shipping, billing } = address
+        //     if (shipping) {
+        //         if (shipping.city) {
+        //             if (!isValidName.test(shipping.city))
+        //                 return res.status(400).send({ status: false, message: "Enter A Valid City" })
+        //             updateAddress['shipping.city'] = address.shipping.city
+        //         }
+        //         if (shipping.pincode && !isValidPincode.test(shipping.pincode))
+        //             return res.status(400).send({ status: false, message: "Enter A Valid Pincode" })
+        //         updateAddress['shipping.pincode'] = address.shipping.pincode
 
-    if (address) {
+        //     }
+        //     console.log("here", address)
+        //     if (billing) {
+        //         if (billing.city && !isValidName.test(billing.city))
+        //             return res.status(400).send({ status: false, message: "Enter A Valid City" })
+        //         updateAddress['billing.city'] = address.billing.city
+        //         if (billing.pincode && !isValidPincode.test(billing.pincode))
+        //             return res.status(400).send({ status: false, message: "Enter A Valid Pincode" })
+        //         updateAddress['billing.pincode'] = address.billing.pincode
+        //     }
 
-        let { shipping, billing } = address
-        if (shipping) {
-            if (shipping.city) {
-                if (!isValidName.test(shipping.city))
-                    return res.status(400).send({ status: false, message: "Enter A Valid City" })
-                updateAddress['shipping.city'] = address.shipping.city
+        // }
+        //req.body.address = updateAddress
+        //console.log(updateAddress)
+
+        //updateAddress['address'] = fetchUser.address
+
+        // if (address) {
+        //     if (address.shipping) {
+        //         if (address.shipping.street) {
+        //             if (!isPresent(address.shipping.street)) {
+        //                 return res.status(400).send({ status: false, message: 'Please provide street to update' })
+        //             }
+        //             updateAddress['address.shipping.street'] = address.shipping.street
+        //         }
+        //         if (address.shipping.city) {
+        //             if (!isPresent(address.shipping.city)) {
+        //                 return res.status(400).send({ status: false, message: 'Please provide city name to update' })
+        //             }
+        //             updateAddress['address.shipping.city'] = address.shipping.city
+        //         }
+        //         if (address.shipping.pincode) {
+        //             // if (typeof address.shipping.pincode !== 'number') {
+        //             //     return res.status(400).send({ status: false, message: 'Please provide pincode to update' })
+        //             // }
+        //             updateAddress['address.shipping.pincode'] = address.shipping.pincode
+        //         }
+        //     }
+        //     if (address.billing) {
+        //         if (address.billing.street) {
+        //             if (!isPresent(address.billing.street)) {
+        //                 return res.status(400).send({ status: false, message: 'Please provide street to update' })
+        //             }
+        //             updateAddress['address.billing.street'] = address.billing.street
+        //         }
+        //         if (address.billing.city) {
+        //             if (!isPresent(address.billing.city)) {
+        //                 return res.status(400).send({ status: false, message: 'Please provide city to update' })
+        //             }
+        //             updateAddress['address.billing.city'] = address.billing.city
+        //         }
+        //         if (address.billing.pincode) {
+        //             if (typeof address.billing.pincode !== 'number') {
+        //                 return res.status(400).send({ status: false, message: 'Please provide pincode to update' })
+        //             }
+        //             updateAddress['address.billing.pincode'] = address.billing.pincode
+        //         }
+        //     }
+        // }
+
+        // let data = {
+        //     fname: fname,
+        //     lname: lname,
+        //     email: email,
+        //     phone: phone,
+        //     password: hashedPassword,
+        //     profileImage: req.body.profileImage,
+        //     address: updateAddress
+
+        // }
+
+        //console.log(data)
+        //address = updateAddress
+
+       
+
+        //updateAddress = { address: fetchUser.address }
+        
+        if(address){
+            let {shipping , billing} = address
+            
             }
 
-            if (shipping.pincode && !isValidPincode.test(shipping.pincode))
-                return res.status(400).send({ status: false, message: "Enter A Valid Pincode" })
-            updateAddress['shipping.pincode'] = address.shipping.pincode
 
-        }
-        console.log("here", address)
-        if (billing) {
-            if (billing.city && !isValidName.test(billing.city))
-                return res.status(400).send({ status: false, message: "Enter A Valid City" })
-            updateAddress['billing.city'] = address.billing.city
-            if (billing.pincode && !isValidPincode.test(billing.pincode))
-                return res.status(400).send({ status: false, message: "Enter A Valid Pincode" })
-            updateAddress['billing.pincode'] = address.billing.pincode
-        }
+        console.log("from here==>", updateAddress)
+        req.body["address"] = updateAddress
 
+
+        console.log(req.body.address)
+        let updateduser = await userModel.findOneAndUpdate(
+            { _id: userId },
+            req.body,
+            { new: true }
+
+        )
+        console.log("dekh", address)
+        return res.send({ status: true, message: "updated user successfully", data: updateduser })
     }
-    //req.body.address = updateAddress
-    //console.log(updateAddress)
 
-    //updateAddress['address'] = fetchUser.address
 
-    // if (address) {
-    //     if (address.shipping) {
-    //         if (address.shipping.street) {
-    //             if (!isPresent(address.shipping.street)) {
-    //                 return res.status(400).send({ status: false, message: 'Please provide street to update' })
-    //             }
-    //             updateAddress['address.shipping.street'] = address.shipping.street
-    //         }
-    //         if (address.shipping.city) {
-    //             if (!isPresent(address.shipping.city)) {
-    //                 return res.status(400).send({ status: false, message: 'Please provide city name to update' })
-    //             }
-    //             updateAddress['address.shipping.city'] = address.shipping.city
-    //         }
-    //         if (address.shipping.pincode) {
-    //             // if (typeof address.shipping.pincode !== 'number') {
-    //             //     return res.status(400).send({ status: false, message: 'Please provide pincode to update' })
-    //             // }
-    //             updateAddress['address.shipping.pincode'] = address.shipping.pincode
-    //         }
-    //     }
-    //     if (address.billing) {
-    //         if (address.billing.street) {
-    //             if (!isPresent(address.billing.street)) {
-    //                 return res.status(400).send({ status: false, message: 'Please provide street to update' })
-    //             }
-    //             updateAddress['address.billing.street'] = address.billing.street
-    //         }
-    //         if (address.billing.city) {
-    //             if (!isPresent(address.billing.city)) {
-    //                 return res.status(400).send({ status: false, message: 'Please provide city to update' })
-    //             }
-    //             updateAddress['address.billing.city'] = address.billing.city
-    //         }
-    //         if (address.billing.pincode) {
-    //             if (typeof address.billing.pincode !== 'number') {
-    //                 return res.status(400).send({ status: false, message: 'Please provide pincode to update' })
-    //             }
-    //             updateAddress['address.billing.pincode'] = address.billing.pincode
-    //         }
-    //     }
-    // }
-
-    // let data = {
-    //     fname: fname,
-    //     lname: lname,
-    //     email: email,
-    //     phone: phone,
-    //     password: hashedPassword,
-    //     profileImage: req.body.profileImage,
-    //     address: updateAddress
-
-    // }
-
-    //console.log(data)
-    //address = updateAddress
-    console.log(req.body.address)
-    let updateuser = await userModel.findOneAndUpdate(
-        { _id: userId },
-        {
-            fname: fname,
-            lname: lname,
-            email: email,
-            phone: phone,
-            password: hashedPassword,
-            profileImage: req.body.profileImage,
-            address: updateAddress
-        },
-        { new: true }
-
-    )
-    console.log("dekh", address)
-    return res.send({ status: true, message: "updated user successfully", data: updateuser })
-
+    catch (error) {
+        console.log(error)
+        return res.status(500).send({ status: false, message: error.message })
+    }
 }
 
 // const updateuser = async function (req, res) {
