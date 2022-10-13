@@ -16,7 +16,13 @@ router.put('/user/:userId/profile',middleware.authentication,userController.upda
 //Product API's
 router.post('/products',productController.createProduct);
 
-router.get('/products/:productId',productController.getProduct)
+router.get('/products/:productId',productController.getProduct);
+
+router.get('/products',productController.getProductByFilter);
+
+router.put('/products/:productId',productController.updateProduct);
+
+router.delete('/products/:productId',productController.deleteProduct);
 
 
 
