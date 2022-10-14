@@ -58,25 +58,27 @@ const createUser = async function (req, res) {
         if (!address) {
             return res.status(400).send({ status: false, message: "address is required" })
         }
-        // let { shipping, billing } = address
-        if (!address.shipping) {
+
+        let { shipping, billing } = address
+
+        if (!shipping) {
             return res.status(400).send({ status: false, message: "shipping is required" })
         }
 
-        if (!address.shipping.street || !address.shipping.city || !address.shipping.pincode) return res.status(400).send({ status: false, message: "shipping - street,city,pincode ; are required" })
+        if (!shipping.street || !shipping.city || !shipping.pincode) return res.status(400).send({ status: false, message: "shipping - street,city,pincode ; are required" })
 
-        if (!address.billing) {
+        if (!billing) {
             return res.status(400).send({ status: false, message: "billing is required" })
         }
 
-        if (!address.billing.street || !address.billing.city || !address.billing.pincode) return res.status(400).send({ status: false, message: "billing - street,city,pincode ; are required" })
+        if (!billing.street || !billing.city || !billing.pincode) return res.status(400).send({ status: false, message: "billing - street,city,pincode ; are required" })
 
 
-        if (!isValidPincode.test(address.shipping.pincode) || !isValidPincode.test(address.billing.pincode)) {
+        if (!isValidPincode.test(shipping.pincode) || !isValidPincode.test(billing.pincode)) {
             return res.status(400).send({ status: false, message: "Enter A Valid Pincode" })
         }
 
-        if (!isValidName.test(address.shipping.city) || !isValidName.test(address.billing.city)) {
+        if (!isValidName.test(shipping.city) || !isValidName.test(billing.city)) {
             return res.status(400).send({ status: false, message: "Enter A Valid City" })
         }
 
@@ -143,10 +145,6 @@ const getUser = async function (req, res) {
     try {
         let userId = req.params.userId
 
-        // if (!data) {
-        //     return res.status(400).send({ status: false, message: "provide something in params" })
-        // }//this msg will never get printed
-
         if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "UserId Is Invalid" })
 
         const fetchUser = await userModel.findById({ _id: userId })
@@ -180,50 +178,44 @@ const updateuser = async (req, res) => {
 
         if (!isValidRequestBody(req.body) && !isPresent(profileImage)) return res.status(400).send({ status: false, message: "body cannot be empty" })
 
-        if (isPresent(fname)) {
-            if (!isValidName.test(fname))
-                return res.status(400).send({ status: false, message: "Enter A Valid Fname" })
+        if (Object.values(req.body).includes(fname)) {
+            if (!isValidName.test(fname) || !isPresent(fname)) return res.status(400).send({ status: false, message: "Enter A Valid Fname" })
         }
 
-        if (lname) {
-            if (!isValidName.test(lname))
-                return res.status(400).send({ status: false, message: "Enter A Valid Lname" })
+        if (Object.values(req.body).includes(lname)) {
+            if (!isValidName.test(lname) || !isPresent(lname)) return res.status(400).send({ status: false, message: "Enter A Valid Lname" })
         }
 
-        if (email) {
-            if (!isValidMail.test(email))
-                return res.status(400).send({ status: false, message: "Enter A Valid Email" })
+        if (Object.values(req.body).includes(email)) {
+            if (!isValidMail.test(email) || !isPresent(email)) return res.status(400).send({ status: false, message: "Enter A Valid Email" })
             let repeatedEmail = await userModel.findOne({ email: email })
             if (repeatedEmail) return res.status(400).send({ status: false, message: `${email} Already In Use` })
         }
-        console.log("hiii")
 
-        if (phone) {
-            console.log("truuu")
-            if (!isValidNumber.test(phone))
-                return res.status(400).send({ status: false, message: "Enter A Valid Phone Number" })
+        if (Object.values(req.body).includes(phone)) {
+            if (!isValidNumber.test(phone) || !isPresent(phone)) return res.status(400).send({ status: false, message: "Enter A Valid Phone Number" })
             let repeatedPhone = await userModel.findOne({ phone: phone })
             if (repeatedPhone) return res.status(400).send({ status: false, message: `${phone} Already In Use` })
         }
 
-       
-
-
-        if (password) {
-            if (!isValidPassword.test(password)) {
-                return res.status(400).send({ status: false, message: "Enter A Valid Password" })
-            }
+        if (Object.values(req.body).includes(password)) {
+            if (!isValidPassword.test(password) || !isPresent(password)) return res.status(400).send({ status: false, message: "Enter A Valid Password" })
             const salt = await bcrypt.genSalt(10);
             let hashedPassword = await bcrypt.hash(password, salt)
             req.body["password"] = hashedPassword
         }
 
-        
+        console.log(profileImage)
+        //if empty : take profileImage from DB
+        if (profileImage) {
+            if (profileImage.length > 0) {
+                let uploadedFileURL = await uploadFile(profileImage[0])
+                req.body.profileImage = uploadedFileURL
+            }
+            if (!profileImage.length) {
+                req.body["profileImage"] = fetchUser.profileImage
+            }
 
-        //should not except empty profileimage to update?
-        if (profileImage && profileImage.length > 0) {
-            let uploadedFileURL = await uploadFile(profileImage[0])
-            req.body.profileImage = uploadedFileURL
         }
 
         let updateAddress = {}
@@ -315,14 +307,14 @@ const updateuser = async (req, res) => {
         //console.log(data)
         //address = updateAddress
 
-       
+
 
         //updateAddress = { address: fetchUser.address }
-        
-        if(address){
-            let {shipping , billing} = address
-            
-            }
+
+        if (address) {
+            let { shipping, billing } = address
+
+        }
 
 
         console.log("from here==>", updateAddress)
