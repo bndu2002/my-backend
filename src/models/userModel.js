@@ -9,14 +9,14 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true, trim: true },
     address: {
         shipping: {
-            street: { type: String,  trim: true },
-            city: { type: String,  trim: true },
-            pincode: { type: Number,trim: true }
+            street: { type: String, required: true, trim: true },
+            city: { type: String, required: true, trim: true },
+            pincode: { type: Number, required: true, trim: true }
         },
         billing: {
-            street: { type: String, trim: true },
-            city: { type: String,  trim: true },
-            pincode: { type: Number,  trim: true }
+            street: { type: String, required: true, trim: true },
+            city: { type: String, required: true, trim: true },
+            pincode: { type: Number, required: true, trim: true }
         }
     }
 }, { timestamps: true })

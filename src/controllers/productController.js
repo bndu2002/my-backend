@@ -7,7 +7,7 @@ const userModel = require('../models/userModel');
 
 const createProduct = async function (req, res) {
     try {
-        let { isDeleted, installments, availableSizes, style, isFreeShipping, currencyFormat, currencyId, price, description, title } = req.body
+        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style,  availableSizes, installments, isDeleted } = req.body
 
         if (!isValidRequestBody(req.body)) return res.status(400).send({ status: false, message: "body cannot be empty" });
 
@@ -19,8 +19,8 @@ const createProduct = async function (req, res) {
                 return res.status(409).send({ status: false, message: "title has to be unique" })
         }
 
-        //regex for title : mandatory alaphabet??
-        if (!isPresent(description) || !isValidTitle.test(description)) { return res.status(400).send({ status: false, message: "description is missing or invalid" }) }
+        
+        if (!isPresent(description)) { return res.status(400).send({ status: false, message: "description is missing" }) }
 
 
         if (!isPresent(price) || !(/^\d*\.?\d*$/).test(price)) return res.status(400).send({ status: false, message: "price is missing or invalid" })
@@ -92,7 +92,7 @@ const createProduct = async function (req, res) {
 
         let productCreate = await productModel.create(req.body)
 
-        return res.status(201).send({ status: true, message: "created successfull", data: productCreate })
+        return res.status(201).send({ status: true, message: "created successfully", data: productCreate })
 
     }
     catch (error) {
@@ -121,8 +121,9 @@ let getProductByFilter = async (req, res) => {
             }
             if (Object.values(query).includes(query.size)) {
                 if (!isPresent(query.size)) return res.status(400).send({ status: false, message: "provide value" })
-                let size = await productModel.find({ availableSizes: query.size, isDeleted: false })
-                return size.length == 0 ? res.status(404).send({ status: false, message: "product not found given size" }) : res.status(200).send({ status: true, data: size })
+                let sizes = query.size.split(",")
+                let size = await productModel.find({ availableSizes: {$in : sizes}, isDeleted: false })
+                return size.length == 0 ? res.status(404).send({ status: false, message: "product not found with given size" }) : res.status(200).send({ status: true, data: size })
             }
             if (Object.values(query).includes(query.name)) {
                 if (!isPresent(query.name)) return res.status(400).send({ status: false, message: "provide value" })
@@ -194,6 +195,7 @@ const updateProduct = async function (req, res) {
 
         let { description, isFreeShipping, installments, availableSizes, style, currencyFormat, currencyId, price, title } = data
 
+        //MUST READ  : Object.values(data).includes(title)
         if (Object.values(data).includes(title)) {
             if (!isValidTitle.test(title) || !isPresent(title)) return res.status(400).send({ status: false, message: "enter a valid title" })
             let uniqueTitle = await productModel.findOne({ title: title })
@@ -204,7 +206,7 @@ const updateProduct = async function (req, res) {
             if (!(/^\d*\.?\d*$/).test(price) || !isPresent(price)) return res.status(400).send({ status: false, message: " please provide valid price" })
         }
 
-        //currencyId => if value empty should not update 
+
         if (Object.values(data).includes(currencyId)) {
             if (!(currencyId).includes("INR")) return res.status(400).send({ status: false, message: "Currency ID must be INR" })
         }
@@ -214,7 +216,7 @@ const updateProduct = async function (req, res) {
         }
         console.log("from here", req.files)
 
-        //if empty take profileImage from DB
+        //if empty, take profileImage from DB
         if (productImage) {
             if (productImage.length > 0) {
                 let uploadedFileURL = await uploadFile(productImage[0])
@@ -231,6 +233,7 @@ const updateProduct = async function (req, res) {
         }
 
         if (Object.values(data).includes(availableSizes)) {
+            //MUST READ : .split() && .join()
             availableSizes = availableSizes.split(",")
             for (let i = 0; i < availableSizes.length; i++) {
                 if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes[i])))
@@ -240,10 +243,7 @@ const updateProduct = async function (req, res) {
         }
 
 
-        if (Object.values(data).includes(availableSizes)) {
-            if (!isPresent(availableSizes)) return res.status(400).send({ status: false, message: "please provide value in availableSizes" })
 
-        }
 
         //monalisa mittal
 
