@@ -2,7 +2,6 @@ const userModel = require('../models/userModel');
 const { isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword } = require('../validator/validator')
 const bcrypt = require("bcrypt")
 const { uploadFile } = require('../controllers/awsController');
-
 const jwt = require('jsonwebtoken');
 let mongoose = require('mongoose');
 

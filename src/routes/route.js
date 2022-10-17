@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router();
 const userController = require('../controllers/userController');
-const productController = require('../controllers/productController')
+const productController = require('../controllers/productController');
+const cartController = require('../controllers/cartController')
 const middleware = require('../middleware/auth')
 
-
+//UserAPI's
 router.post('/register', userController.createUser);
 
 router.post('/login',userController.loginUser);
@@ -24,6 +25,14 @@ router.put('/products/:productId',productController.updateProduct);
 
 router.delete('/products/:productId',productController.deleteProduct);
 
+//Cart API's
+router.post('/users/:userId/cart',middleware.authentication,cartController.createCart);
+
+router.put('/users/:userId/cart',middleware.authentication,cartController.updateCart);
+
+router.get('/users/:userId/cart',cartController.getCart);
+
+router.delete('/users/:userId/cart',cartController.deleteCart);
 
 
 
