@@ -30,9 +30,9 @@ router.post('/users/:userId/cart',middleware.authentication,cartController.creat
 
 router.put('/users/:userId/cart',middleware.authentication,cartController.updateCart);
 
-router.get('/users/:userId/cart',cartController.getCart);
+router.get('/users/:userId/cart',middleware.authentication,cartController.getCart);
 
-router.delete('/users/:userId/cart',cartController.deleteCart);
+router.delete('/users/:userId/cart',middleware.authentication,cartController.deleteCart);
 
 
 
