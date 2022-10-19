@@ -1,5 +1,5 @@
 const userModel = require('../models/userModel');
-const { isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword } = require('../validator/validator')
+const {isValidObjectId, isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword } = require('../validator/validator')
 const bcrypt = require("bcrypt")
 const { uploadFile } = require('../controllers/awsController');
 const jwt = require('jsonwebtoken');
@@ -39,7 +39,7 @@ const createUser = async function (req, res) {
             //profileImage was available in req.files ; added new key in req.body.profileImage = uploadedFileURL
             req.body.profileImage = uploadedFileURL
         } else {
-            return res.status(400).send({ msg: "No file found" })
+            return res.status(400).send({ status : false , message : "No file found" })
         }
 
         if (!isPresent(password) || !isValidPassword.test(password)) {
@@ -120,7 +120,7 @@ const loginUser = async function (req, res) {
                 iat: Math.floor(new Date().getTime() / 1000)
             },
             "Product5-group59",
-            { expiresIn: "1h" });
+            { expiresIn: "24h" });
 
         let data = {
             userId: findUser._id,
@@ -139,7 +139,7 @@ const getUser = async function (req, res) {
     try {
         let userId = req.params.userId
 
-        if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "UserId Is Invalid" })
+        if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "UserId Is Invalid" })
 
         const fetchUser = await userModel.findById({ _id: userId })
 
@@ -158,7 +158,7 @@ const updateuser = async (req, res) => {
     try {
         let userId = req.params.userId
         
-        if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "UserId Is Invalid" })
+        if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "UserId Is Invalid" })
 
         const fetchUser = await userModel.findById({ _id: userId })
 
@@ -178,6 +178,7 @@ const updateuser = async (req, res) => {
         if (Object.values(req.body).includes(fname)) {
             if (!isValidName.test(fname) || !isPresent(fname)) return res.status(400).send({ status: false, message: "Enter A Valid Fname" })
             updateUser["fname"] = fname
+
         }
 
         if (Object.values(req.body).includes(lname)) {
@@ -213,7 +214,7 @@ const updateuser = async (req, res) => {
             if (profileImage.length > 0) {
                 let uploadedFileURL = await uploadFile(profileImage[0])
                 req.body.profileImage = uploadedFileURL
-                updateUser["fname"] = req.body.profileImage
+                updateUser["profileImage"] = req.body.profileImage
             }
             if (!profileImage.length) {
                 req.body["profileImage"] = fetchUser.profileImage

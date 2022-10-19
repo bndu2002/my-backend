@@ -27,9 +27,6 @@ const isValidObjectId = (ObjectId) => {
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
-// const isProfileImage = (image)=>{
-//     let pattern = (/^https?:\/\/(.+\/)+.+(\.(gif|png|jpg|jpeg|webp|svg|psd|bmp|tif|jfif))$/i)
-// return pattern.test(image)
-// }
+
 
 module.exports = {isValidObjectId,isValidTitle,isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword }
