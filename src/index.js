@@ -10,9 +10,6 @@ app.use(express.json());//makes sure data present in req.body is in JSON format,
 app.use(multer().any())
 
 
-
-
-
 mongoose.connect("mongodb+srv://vandana:7CJBNDDwPorDTTrX@cluster0.crrs6th.mongodb.net/group59Database", {
     useNewUrlParser: true
 })
@@ -28,4 +25,4 @@ app.listen(PORT, function () {
 });
 
 
-// https://www.makeuseof.com/nodejs-bcrypt-hash-verify-salt-password/
+//https://www.makeuseof.com/nodejs-bcrypt-hash-verify-salt-password/

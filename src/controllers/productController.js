@@ -1,13 +1,13 @@
 const productModel = require('../models/productModel')
-const { isValidObjectId, isValidName, isValidRequestBody, isPresent, isValidTitle } = require('../validator/validator')
+const { isValidObjectId, isValidRequestBody, isPresent, isValidTitle } = require('../validator/validator')
 const { uploadFile } = require('../controllers/awsController');
-const userModel = require('../models/userModel');
+
 
 
 
 const createProduct = async function (req, res) {
     try {
-        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style,  availableSizes, installments, isDeleted } = req.body
+        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, isDeleted } = req.body
 
         if (!isValidRequestBody(req.body)) return res.status(400).send({ status: false, message: "body cannot be empty" });
 
@@ -19,9 +19,7 @@ const createProduct = async function (req, res) {
                 return res.status(409).send({ status: false, message: "title has to be unique" })
         }
 
-        
         if (!isPresent(description)) { return res.status(400).send({ status: false, message: "description is missing" }) }
-
 
         if (!isPresent(price) || !(/^\d*\.?\d*$/).test(price)) return res.status(400).send({ status: false, message: "price is missing or invalid" })
 
@@ -49,16 +47,6 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ msg: "No file found" })
         }
 
-        // let joinsize = availableSizes.join(",")
-        //console.log(availableSizes)
-
-        // availableSizes = availableSizes.split(",")
-        // if (!isPresent(availableSizes) || !["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes)) {
-        //    // console.log(joinsize)
-        //     return res.status(400).send({ status: false, message: "availableSizes is missing or invalid : provide  S, XS, M, X, L, XXL, XL " })
-        // }
-
-
         if (!isPresent(availableSizes)) return res.status(400).send({ status: false, message: "Sizes Are Required" })
 
         availableSizes = availableSizes.split(",")
@@ -69,8 +57,6 @@ const createProduct = async function (req, res) {
         }
 
         req.body.availableSizes = availableSizes
-
-
 
         if (Object.values(req.body).includes(style)) {
             if (!isPresent(style))
@@ -101,13 +87,12 @@ const createProduct = async function (req, res) {
 }
 
 
-
 let getProductByFilter = async (req, res) => {
     try {
         let query = req.query
 
         if (Object.keys(query).length > 0) {
-            if (query.size && query.name && query.priceGreaterThan) {
+            if (query.size && query.name && query.priceGreaterThan) {                      //$regex : finds a doc following the pattern provided in query.name
                 let filter1 = await productModel.find({ availableSizes: query.size, title: { $regex: query.name }, price: { $gte: query.priceGreaterThan }, isDeleted: false })
                 return filter1.length == 0 ? res.status(404).send({ status: false, message: "product not found given filter" }) : res.status(200).send({ status: true, data: filter1 })
             }
@@ -122,7 +107,7 @@ let getProductByFilter = async (req, res) => {
             if (Object.values(query).includes(query.size)) {
                 if (!isPresent(query.size)) return res.status(400).send({ status: false, message: "provide value" })
                 let sizes = query.size.split(",")
-                let size = await productModel.find({ availableSizes: {$in : sizes}, isDeleted: false })
+                let size = await productModel.find({ availableSizes: { $in: sizes }, isDeleted: false })
                 return size.length == 0 ? res.status(404).send({ status: false, message: "product not found with given size" }) : res.status(200).send({ status: true, data: size })
             }
             if (Object.values(query).includes(query.name)) {
@@ -144,7 +129,6 @@ let getProductByFilter = async (req, res) => {
                 let sortprice = await productModel.find({ isDeleted: false }).sort({ price: priceSort })
                 return sortprice.length == 0 ? res.status(404).send({ status: false, message: "product not found" }) : res.status(200).send({ status: true, data: sortprice })
             }
-
 
         } else {
             let allproduct = await productModel.find({ isDeleted: false })
@@ -183,8 +167,6 @@ const updateProduct = async function (req, res) {
 
         let productImage = req.files
 
-        //if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Body should be not empty !" })
-
         if (!isValidRequestBody(data) && !isPresent(productImage)) return res.status(400).send({ status: false, message: "Body should be not empty !" })
 
         if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Given productID is not valid" })
@@ -205,7 +187,6 @@ const updateProduct = async function (req, res) {
         if (Object.values(data).includes(price)) {
             if (!(/^\d*\.?\d*$/).test(price) || !isPresent(price)) return res.status(400).send({ status: false, message: " please provide valid price" })
         }
-
 
         if (Object.values(data).includes(currencyId)) {
             if (!(currencyId).includes("INR")) return res.status(400).send({ status: false, message: "Currency ID must be INR" })
@@ -234,6 +215,8 @@ const updateProduct = async function (req, res) {
 
         if (Object.values(data).includes(availableSizes)) {
             //MUST READ : .split() && .join()
+            //.split() : divides a string , put these in an arrey , returns an array
+            //.join() : concatinates all the elems in an array by return a string (opposite of .split)
             availableSizes = availableSizes.split(",")
             for (let i = 0; i < availableSizes.length; i++) {
                 if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes[i])))
@@ -242,10 +225,6 @@ const updateProduct = async function (req, res) {
             req.body.availableSizes = availableSizes
         }
 
-
-
-
-        //monalisa mittal
 
         if (Object.values(data).includes(installments)) {
             if (!Number(installments)) {

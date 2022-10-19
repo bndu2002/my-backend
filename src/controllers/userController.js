@@ -50,10 +50,6 @@ const createUser = async function (req, res) {
 
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        // let { shipping, billing } = address
-        // if (!shipping) return res.status(400).send({ status: false, message: "shipping - street,city,pincode ; are required" })
-        // if (!billing.street || !billing.city || !billing.pincode) return res.status(400).send({ status: false, message: "billing - street,city,pincode ; are required" })
-
         if (!address) {
             return res.status(400).send({ status: false, message: "address is required" })
         }
@@ -116,8 +112,7 @@ const loginUser = async function (req, res) {
 
         let checkPassword = await bcrypt.compare(password, findUser.password)
 
-        if (!checkPassword) return res.status(404).send({ status: false, message: "Incorrect Password" })
-        //if (!findUser || !checkPassword) return res.status(404).send({ status: false, message: "User not found" });
+        if (!checkPassword) return res.status(400).send({ status: false, message: "Incorrect Password" })
 
         let token = jwt.sign(
             {
@@ -162,7 +157,7 @@ const getUser = async function (req, res) {
 const updateuser = async (req, res) => {
     try {
         let userId = req.params.userId
-        //let body = req.body
+        
         if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "UserId Is Invalid" })
 
         const fetchUser = await userModel.findById({ _id: userId })
@@ -208,7 +203,7 @@ const updateuser = async (req, res) => {
             if (!isValidPassword.test(password) || !isPresent(password)) return res.status(400).send({ status: false, message: "Enter A Valid Password" })
             const salt = await bcrypt.genSalt(10);
             let hashedPassword = await bcrypt.hash(password, salt)
-            // req.body["password"] = hashedPassword
+            
             updateUser["password"] = hashedPassword
         }
 
@@ -265,7 +260,7 @@ const updateuser = async (req, res) => {
             { new: true }
 
         )
-        
+
         return res.send({ status: true, message: "updated user successfully", data: updateduser })
     }
     catch (error) {
@@ -274,142 +269,6 @@ const updateuser = async (req, res) => {
     }
 }
 
-// const updateuser = async function (req, res) {
-//     try {
-//         const requestBody = req.body
-//         let userId = req.params.userId
-//         // if (!validObject(userId)) {
-//         //     res.status(400).send({ status: false, message: `${userId} is invalid` })
-//         //     return
-//         // }
-//         const userFound = await userModel.findOne({ _id: userId })
-//         if (!userFound) {
-//             return res.status(404).send({ status: false, message: `User do not exists` })
-//         }
-//         //Authorisation
-//         if (userId.toString() !== req.token.userId) {
-//             res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
-//             return
-//         }
-//         if (!isValidRequestBody(requestBody)) {
-//             res.status(400).send({ status: false, message: 'Please provide details to update' })
-//             return
-//         }
-//         // destructuring the body
-//         let { fname, lname, email, phone, password, address } = requestBody;
-//         let updateUserData = {}
-//         if (isPresent(fname)) {
-//             updateUserData['fname'] = fname
-//         }
-//         if (isPresent(lname)) {
-//             updateUserData['lname'] = lname
-//         }
-//         if (isPresent(email)) {
-//             if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.trim()))) {
-//                 res.status(400).send({ status: false, message: `Email should be a valid email address` })
-//             }
-//             const duplicateEmail = await userModel.find({ email: email })
-//             if (duplicateEmail.length) {
-//                 res.status(400).send({ status: false, message: 'email already exists' })
-//             }
-//             updateUserData['email'] = email
-//         }
-//         if (isPresent(phone)) {
-//             if (!(/^(1\s|1|)?((\(\d{3}\))|\d{3})(\-|\s)?(\d{3})(\-|\s)?(\d{4})$/.test(phone.trim()))) {
-//                 res.status(400).send({ status: false, message: `Please provide valid phone number` })
-//             }
-//             const duplicatePhone = await userModel.find({ phone: phone })
-//             if (duplicatePhone.length) {
-//                 res.status(400).send({ status: false, message: 'phone already exists' })
-//             }
-//             updateUserData['phone'] = phone
-//         }
-//         if (isValid(password)) {
-//             console.log("hlooo")
-//             const encrypt = await bcrypt.hash(password, 10)
-//             updateUserData['password'] = encrypt
-//         }
-//         if (address) {
-//             if (address.shipping) {
-//                 if (address.shipping.street) {
-//                     if (!isPresent(address.shipping.street)) {
-//                         return res.status(400).send({ status: false, message: 'Please provide street to update' })
-//                     }
-//                     updateUserData['address.shipping.street'] = address.shipping.street
-//                 }
-//                 if (address.shipping.city) {
-//                     if (!isPresent(address.shipping.city)) {
-//                         return res.status(400).send({ status: false, message: 'Please provide city name to update' })
-//                     }
-//                     updateUserData['address.shipping.city'] = address.shipping.city
-//                 }
-//                 if (address.shipping.pincode) {
-//                     if (typeof address.shipping.pincode !== 'number') {
-//                         return res.status(400).send({ status: false, message: 'Please provide pincode to update' })
-//                     }
-//                     updateUserData['address.shipping.pincode'] = address.shipping.pincode
-//                 }
-//             }
-//             if (address.billing) {
-//                 if (address.billing.street) {
-//                     if (!isPresent(address.billing.street)) {
-//                         return res.status(400).send({ status: false, message: 'Please provide street to update' })
-//                     }
-//                     updateUserData['address.billing.street'] = address.billing.street
-//                 }
-//                 if (address.billing.city) {
-//                     if (!isPresent(address.billing.city)) {
-//                         return res.status(400).send({ status: false, message: 'Please provide city to update' })
-//                     }
-//                     updateUserData['address.billing.city'] = address.billing.city
-//                 }
-//                 if (address.billing.pincode) {
-//                     if (typeof address.billing.pincode !== 'number') {
-//                         return res.status(400).send({ status: false, message: 'Please provide pincode to update' })
-//                     }
-//                     updateUserData['address.billing.pincode'] = address.billing.pincode
-//                 }
-//             }
-//         }
-//         // aws.config.update({
-//         //     accessKeyId: "AKIAY3L35MCRRMC6253G",  // id
-//         //     secretAccessKey: "88NOFLHQrap/1G2LqUy9YkFbFRe/GNERsCyKvTZA",  // like your secret password
-//         //     region: "ap-south-1" // Mumbai region
-//         // });
-//         // // this function uploads file to AWS and gives back the url for the file
-//         // let uploadFile = async (file) => {
-//         //     return new Promise(function (resolve, reject) { // exactly 
-//         //         // Create S3 service object
-//         //         let s3 = new aws.S3({ apiVersion: "2006-03-01" });
-//         //         var uploadParams = {
-//         //             ACL: "public-read", // this file is publically readable
-//         //             Bucket: "classroom-training-bucket", // HERE
-//         //             Key: "pk_newFolder/profileimages" + file.originalname, // HERE    "pk_newFolder/harry-potter.png" pk_newFolder/harry-potter.png
-//         //             Body: file.buffer,
-//         //         };
-//         //         // Callback - function provided as the second parameter ( most oftenly)
-//         //         s3.upload(uploadParams, function (err, data) {
-//         //             if (err) {
-//         //                 return reject({ "error": err });
-//         //             }
-//         //             console.log(data)
-//         //             console.log(`File uploaded successfully. ${data.Location}`);
-//         //             return resolve(data.Location); //HERE 
-//         //         });
-//         //     });
-//         // };
-//         let profileImage = req.files;
-//         if (profileImage && profileImage.length > 0) {
-//             let uploadedFileURL = await uploadFile(profileImage[0]);
-//             if (uploadedFileURL) {
-//                 updateUserData['profileImage'] = uploadedFileURL
-//             }
-//         }
-//         const updatedUserData = await userModel.findOneAndUpdate({ _id: userId }, updateUserData, { new: true })
-//         return res.status(201).send({ status: true, data: updatedUserData })
-//     } catch (error) {
-//         return res.status(500).send({ status: false, msg: error.message });
-//     }
-// }
+
 
 module.exports = { createUser, loginUser, getUser, updateuser }
