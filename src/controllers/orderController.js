@@ -33,6 +33,7 @@ const createOrder = async function (req, res) {
 
             let array = checkCart.items
             let sum = 0
+            //to get the collective quantity of all the products
             for (let i = 0; i < array.length; i++) {
                 sum += array[i].quantity
             }
@@ -72,6 +73,7 @@ const updateOrder = async function (req, res) {
         //Cart ID : exists or not need to check ??
         if (!isValidObjectId(userid)) return res.status(400).send({ status: false, message: "user id is invalid" })
 
+        //UNCOMMENT IT IF IT'S NEEDED========================>
         // let findUser = await userModel.findById(userid)
         // if (!findUser) return res.status(404).send({ status: false, message: "User Not Found" })
         // let findCart = await cartModel.findOne({ userId: userid })
