@@ -104,6 +104,8 @@ const loginUser = async function (req, res) {
         let email = req.body.email
         let password = req.body.password;
 
+        if (!isValidRequestBody(req.body)) return res.status(400).send({ status: false, messaeg: "body cannot be empty" })
+
         if (!email || !password) return res.status(400).send({ status: false, message: "Email and Password are required" })
 
         let findUser = await userModel.findOne({ email: email })

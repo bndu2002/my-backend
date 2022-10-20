@@ -91,6 +91,7 @@ let getProductByFilter = async (req, res) => {
     try {
         let query = req.query
 
+        //need to write all possible combinations??
         if (Object.keys(query).length > 0) {
             if (query.size && query.name && query.priceGreaterThan) {                      //$regex : finds a doc following the pattern provided in query.name
                 let filter1 = await productModel.find({ availableSizes: query.size, title: { $regex: query.name }, price: { $gte: query.priceGreaterThan }, isDeleted: false })

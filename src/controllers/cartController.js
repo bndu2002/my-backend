@@ -12,6 +12,7 @@ const createCart = async (req, res) => {
 
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "enter a valid user id" })
 
+       
         let findUser = await userModel.findById(userId)
 
         if (!findUser) return res.status(404).send({ status: false, message: "User Not Found" })
@@ -225,9 +226,9 @@ let getCart = async function (req, res) {
 
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "Uesr id is not valid" })
 
-        let getCartdetails = await cartModel.findOne({ userId: userId }).populate('items.productId')
+        let getCartdetails = await cartModel.findOne({ userId: userId }).populate({ path: 'items.productId', model: 'Product', select: { _id: 1, title: 1, price: 1 } })
 
-        if (!getCartdetails) return res.status(404).send({ status: false, msg: `Cart not found of ${userId} User` });
+        if (!getCartdetails || !getCartdetails.items.length ) return res.status(404).send({ status: false, msg: `Cart not found of ${userId} User` });
 
         //Authorization Check
         if (getCartdetails.userId != req.token.userId) return res.status(403).send({ status: false, message: "Unauthorized User" })

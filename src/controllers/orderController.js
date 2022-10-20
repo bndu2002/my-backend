@@ -13,6 +13,8 @@ const createOrder = async function (req, res) {
         //Authorization Check
         if (req.token.userId != id) return res.status(403).send({ status: false, message: "Unauthorized Access" })
 
+        if (!isValidRequestBody(data)) return res.status(400).send({ status: false, messaeg: "body cannot be empty" })
+        
         if (!isValidObjectId(data.cartId)) return res.status(400).send({ status: false, message: "cart id is missing OR invalid" })
 
         let checkCart = await cartModel.findOne({ _id: data.cartId, userId: id })
@@ -25,7 +27,7 @@ const createOrder = async function (req, res) {
         //if the order of this user doesn't exist in order's collection , place order
         if (!duplicateOrder) {
 
-            if (checkCart.items == []) {
+            if (!checkCart.items.length) {
                 return res.status(404).send({ status: false, msg: "cart not found" })
             }
 
@@ -70,27 +72,21 @@ const updateOrder = async function (req, res) {
         //Cart ID : exists or not need to check ??
         if (!isValidObjectId(userid)) return res.status(400).send({ status: false, message: "user id is invalid" })
 
-        let findUser = await userModel.findById(userid)
-
-        if (!findUser) return res.status(404).send({ status: false, message: "User Not Found" })
-
-        let findCart = await cartModel.findOne({ userId: userid })
-
-        if (!findCart) return res.status(404).send({ status: false, message: "Cart Of This User Not Found" })
+        // let findUser = await userModel.findById(userid)
+        // if (!findUser) return res.status(404).send({ status: false, message: "User Not Found" })
+        // let findCart = await cartModel.findOne({ userId: userid })
+        // if (!findCart) return res.status(404).send({ status: false, message: "Cart Of This User Not Found" })
 
         //Authorization Check
         if (userid != req.token.userId) return res.status(403).send({ status: false, message: "Unauthorized User" })
+
+        if (!isValidRequestBody(req.body)) return res.status(400).send({ status: false, messaeg: "body cannot be empty" })
 
         if (!isPresent(orderId) || !isPresent(status)) return res.status(400).send({ status: false, message: "status and orderID are required" })
 
         if (!isValidObjectId(orderId)) return res.status(400).send({ status: false, message: "order id is missing OR invalid" })
 
         if (!(["completed", "cancelled"]).includes(status)) return res.status(400).send({ status: false, message: "status must containg : completed OR cancelled" })
-
-        // let user = await userModel.find({ _id: id })
-        // if (!user) {
-        //     return res.status(404).send({ status: false, message: "user not found" })
-        // }
 
         let orders = await orderModel.findOne({ _id: orderId, userId: userid })
 
@@ -102,13 +98,32 @@ const updateOrder = async function (req, res) {
             return res.status(400).send({ sttaus: false, message: "This Order Cannot Be Cancelled" })
         }
 
-        let updateStatus = await orderModel.findOneAndUpdate(
-            { _id: orderId },
-            { $set: { status: status } },
-            { new: true }
-        )
+        //if order is completed cannot cancel
+        if (orders.status == "completed" && status == "cancelled") return res.status(400).send({ status: false, message: "Completed Order Cannot Be Cancelled" })
 
-        return res.status(200).send({ status: true, message: "updated successfully ", data: updateStatus })
+        //if order is cancelled cannot be completed
+        if (orders.status == "cancelled" && status == "completed") return res.status(400).send({ status: false, message: "This Order Has Been Cancelled" })
+
+        if (orders.status == "cancelled" && status == "cancelled") return res.status(400).send({ status: false, message: "Order Is Already Cancelled" })
+
+        if (orders.status == "completed" && status == "completed") return res.status(200).send({ status: true, message: "Order Is Already Completed" })
+
+        if (status == "cancelled") {
+            let cancelOrder = await orderModel.findOneAndUpdate(
+                { _id: orderId },
+                { $set: { status: status, isDeleted: true, deletedAt: Date.now() } },
+                { new: true }
+            )
+            return res.status(200).send({ status: true, message: "Order Cancelled" })
+        }
+
+        let completeOrder = await orderModel.findOneAndUpdate(
+            { _id: orderId },
+            { $set: { status: status, isDeleted: false, deletedAt: null } },
+            { new: true }
+        ).populate({ path: 'items.productId', model: 'Product', select: { _id: 1, title: 1, price: 1 } })
+
+        return res.status(200).send({ status: true, message: "updated successfully ", data: completeOrder })
 
 
     } catch (error) {
