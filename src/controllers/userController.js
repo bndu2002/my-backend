@@ -1,5 +1,5 @@
 const userModel = require('../models/userModel');
-const {isValidObjectId, isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword } = require('../validator/validator')
+const { isValidImage, isValidObjectId, isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword } = require('../validator/validator')
 const bcrypt = require("bcrypt")
 const { uploadFile } = require('../controllers/awsController');
 const jwt = require('jsonwebtoken');
@@ -35,11 +35,12 @@ const createUser = async function (req, res) {
         let profileImage = req.files
 
         if (profileImage && profileImage.length > 0) {
+            if (!isValidImage(profileImage[0].originalname)) return res.status(400).send({ status: false, message: "enter a valid profile image" })
             let uploadedFileURL = await uploadFile(profileImage[0])
             //profileImage was available in req.files ; added new key in req.body.profileImage = uploadedFileURL
             req.body.profileImage = uploadedFileURL
         } else {
-            return res.status(400).send({ status : false , message : "No file found" })
+            return res.status(400).send({ status: false, message: "No file found" })
         }
 
         if (!isPresent(password) || !isValidPassword.test(password)) {
@@ -159,7 +160,7 @@ const getUser = async function (req, res) {
 const updateuser = async (req, res) => {
     try {
         let userId = req.params.userId
-        
+
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "UserId Is Invalid" })
 
         const fetchUser = await userModel.findById({ _id: userId })
@@ -206,7 +207,7 @@ const updateuser = async (req, res) => {
             if (!isValidPassword.test(password) || !isPresent(password)) return res.status(400).send({ status: false, message: "Enter A Valid Password" })
             const salt = await bcrypt.genSalt(10);
             let hashedPassword = await bcrypt.hash(password, salt)
-            
+
             updateUser["password"] = hashedPassword
         }
 
@@ -214,6 +215,7 @@ const updateuser = async (req, res) => {
         //if empty : take profileImage from DB
         if (profileImage) {
             if (profileImage.length > 0) {
+                if (!isValidImage(profileImage[0].originalname)) return res.status(400).send({ status: false, message: "enter a valid profile image" })
                 let uploadedFileURL = await uploadFile(profileImage[0])
                 req.body.profileImage = uploadedFileURL
                 updateUser["profileImage"] = req.body.profileImage

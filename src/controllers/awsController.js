@@ -1,26 +1,26 @@
 const aws = require('aws-sdk')   
-
 //amazon simple storage service
 
-
+//configuring credentials - on whose account you are uploading the file
 aws.config.update({
     accessKeyId: "AKIAY3L35MCRZNIRGT6N",
     secretAccessKey: "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",
-    region: "ap-south-1"
+    region: "ap-south-1" //in india aws region only : mumbai (ap-south-1)
 })
-
 //secretAccessKeyId was wrong , it is secretAccessKey
 
-let uploadFile= async ( file) =>{
+//MUST READ : async
+let uploadFile= async (file) =>{
     return new Promise( function(resolve, reject) {
      // this function will upload file to aws and return the link
      let s3= new aws.S3({apiVersion: '2006-03-01'}); // we will be using the s3 service of aws
+                                                    
  
      var uploadParams= {
          ACL: "public-read",
          Bucket: "classroom-training-bucket",  //HERE
          Key: "abc/" + file.originalname, //file will get saved with its original name in the sub folder abc 
-         Body: file.buffer //???
+         Body: file.buffer //file gets uploaded in small pieces whereby hackers don't hack it
          
      }
      

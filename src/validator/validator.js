@@ -12,6 +12,11 @@ const isValidPincode = (/^\d{3}\s?\d{3}$/)
 
 const isValidNumber = (/^[6-9][0-9]{9}$/)
 
+const isValidImage = (image)=>{
+    let pattern = ("[^\\s]+(.*?)\\.(jpg|jpeg|png|JPG|JPEG|PNG)$")
+    return image.match(pattern)
+}
+
 const isValidRequestBody = (value) => {
     return Object.keys(value).length > 0
 }
@@ -29,4 +34,4 @@ const isValidObjectId = (ObjectId) => {
 
 
 
-module.exports = {isValidObjectId,isValidTitle,isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword }
+module.exports = {isValidImage,isValidObjectId,isValidTitle,isValidPincode, isValidMail, isValidName, isValidRequestBody, isPresent, isValidNumber, isValidPassword }

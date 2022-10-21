@@ -22,7 +22,7 @@ const createCart = async (req, res) => {
 
         if (!isValidRequestBody(req.body)) return res.status(400).send({ status: false, messaeg: "body cannot be empty" })
 
-        if (!isPresent(productId) || !isValidObjectId(productId)) returnres.status(400).send({ status: false, message: "product id is missing or invalid" })
+        if (!isPresent(productId) || !isValidObjectId(productId)) return res.status(400).send({ status: false, message: "product id is missing or invalid" })
 
         let product = await productModel.findOne({ _id: productId, isDeleted: false })
 
@@ -133,10 +133,11 @@ const updateCart = async function (req, res) {
         if (!arr.includes(productId)) return res.status(404).send({ status: false, message: "product does not exist in the cart" })
 
         //if product found , access quantity 
-        //[0] : want one only  , if not : product will get deleted in one go even when the quantity is 3
-        let quantity = findCart.items.filter(x => x.productId.toString() === productId)[0].quantity
+        //[0] : why??  , if not : product will get deleted in one go even when the quantity is 3
+        let quantity = findCart.items.filter(x => x.productId.toString() === productId).quantity
 
-        //console.log("======>", quantity)
+
+        console.log("======>", quantity)
         let product = await productModel.findById(productId)
 
         //if removeProduct == 1

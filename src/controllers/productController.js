@@ -1,5 +1,5 @@
 const productModel = require('../models/productModel')
-const { isValidObjectId, isValidRequestBody, isPresent, isValidTitle } = require('../validator/validator')
+const { isValidImage,isValidObjectId, isValidRequestBody, isPresent, isValidTitle } = require('../validator/validator')
 const { uploadFile } = require('../controllers/awsController');
 
 
@@ -40,6 +40,7 @@ const createProduct = async function (req, res) {
         let productImage = req.files
 
         if (productImage && productImage.length > 0) {
+            if (!isValidImage(productImage[0].originalname)) return res.status(400).send({ status: false, message: "enter a valid product image" })
             let uploadedFileURL = await uploadFile(productImage[0])
             //profileImage was available in req.files ; added new key in req.body.profileImage = uploadedFileURL
             req.body.productImage = uploadedFileURL
@@ -201,6 +202,7 @@ const updateProduct = async function (req, res) {
         //if empty, take profileImage from DB
         if (productImage) {
             if (productImage.length > 0) {
+                if (!isValidImage(productImage[0].originalname)) return res.status(400).send({ status: false, message: "enter a valid product image" })
                 let uploadedFileURL = await uploadFile(productImage[0])
                 //profileImage was available in req.files ; added new key in req.body.profileImage = uploadedFileURL
                 req.body["productImage"] = uploadedFileURL
