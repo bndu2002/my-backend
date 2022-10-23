@@ -1,5 +1,5 @@
 const cartModel = require('../models/cartModel')
-const { isValidObjectId, isValidName, isValidRequestBody, isPresent, isValidTitle } = require('../validator/validator')
+const { isValidObjectId, isValidRequestBody, isPresent } = require('../validator/validator')
 const userModel = require('../models/userModel');
 const productModel = require('../models/productModel')
 
@@ -40,7 +40,8 @@ const createCart = async (req, res) => {
 
             return res.status(201).send({ status: true, message: "Cart Created Successfully", data: createcart })
         }
-        // if (usercart) {
+        
+        //when the cart aleardy exists : add the product
         if (!isPresent(cartId) || !isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "cart id is missing or invalid" })
 
         let findCart = await cartModel.findOne({ _id: cartId, userId: userId })
@@ -134,7 +135,7 @@ const updateCart = async function (req, res) {
 
         //if product found , access quantity 
         //[0] : why??  , if not : product will get deleted in one go even when the quantity is 3
-        let quantity = findCart.items.filter(x => x.productId.toString() === productId).quantity
+        let quantity = findCart.items.filter(x => x.productId.toString() === productId)[0].quantity
 
 
         console.log("======>", quantity)

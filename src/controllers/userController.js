@@ -3,7 +3,7 @@ const { isValidImage, isValidObjectId, isValidPincode, isValidMail, isValidName,
 const bcrypt = require("bcrypt")
 const { uploadFile } = require('../controllers/awsController');
 const jwt = require('jsonwebtoken');
-let mongoose = require('mongoose');
+
 
 
 
@@ -149,7 +149,7 @@ const getUser = async function (req, res) {
         if (!fetchUser) return res.status(404).send({ status: false, message: "User Not Found" })
 
         //Authorization Check
-        if (fetchUser._id != req.token.userId) return res.status(403).send({ status: false, msg: "Unauthorized User" })
+        if (fetchUser._id != req.token.userId) return res.status(403).send({ status: false, message: "Unauthorized User" })
 
         return res.status(200).send({ status: true, message: "User Profile Details", data: fetchUser })
     } catch (error) {

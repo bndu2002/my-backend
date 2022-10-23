@@ -169,7 +169,7 @@ const updateProduct = async function (req, res) {
 
         let productImage = req.files
 
-        if (!isValidRequestBody(data) && !isPresent(productImage)) return res.status(400).send({ status: false, message: "Body should be not empty !" })
+        if (!isValidRequestBody(data) && !isPresent(productImage)) return res.status(400).send({ status: false, message: "Body should not be empty !" })
 
         if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Given productID is not valid" })
 
