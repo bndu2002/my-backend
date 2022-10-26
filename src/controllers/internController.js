@@ -42,10 +42,10 @@ try {
     delete req.body["collegeName"]
     
     let saveIntern = await internModel.create(req.body)
-    res.status(201).send({status:true, message:"successfully created", data :saveIntern })
+    return res.status(201).send({status:true, message:"successfully created", data :saveIntern })
 }
  catch (error) {
-    res.status(500).send({status:false,message:error.message})
+   return res.status(500).send({status:false,message:error.message})
 }
 
 }
