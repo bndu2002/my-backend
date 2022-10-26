@@ -115,14 +115,7 @@ const updateBlog = async function (req, res) {
       //   },
       //   { new: true }
       // );
-      // let obj = {
-      //   tags: tags.push(tags),
-      //   category: category,
-      //   subcategory: subcategory.push(subcategory),
-      //   title: title,
-      //   body: body,
-
-      // }
+      
       let updatedDoc = await blogModel.findByIdAndUpdate(
         { _id: blogId },
         {
