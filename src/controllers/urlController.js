@@ -49,23 +49,32 @@ const shortURL = async function (req, res) {
             req.body.shortUrl = baseUrl + "/" + req.body.urlCode;
         }
 
-        let findURL = await urlModel.findOne({ longUrl: longUrl }).select({ _id: 0, __v: 0 })
+        let cachedURL = await GET_ASYNC(`${longUrl}`)
 
-        if (!findURL) {
+        console.log(cachedURL)
 
-            let url = await urlModel.create(req.body)
+        if (cachedURL) {
+            return res.status(400).send({ status: false, message: "longURL already shortened (from cache)", data: (JSON.parse(cachedURL)) })
+        } else {
+            let findURL = await urlModel.findOne({ longUrl: longUrl }).select({ _id: 0, __v: 0 })
+            if (!findURL) {
 
-            let createURL = {
-                urlCode: url.urlCode,
-                longUrl: url.longUrl,
-                shortUrl: url.shortUrl
+                let url = await urlModel.create(req.body)
+
+                let createURL = {
+                    urlCode: url.urlCode,
+                    longUrl: url.longUrl,
+                    shortUrl: url.shortUrl
+                }
+
+                return res.status(201).send({ status: true, message: "successfully shortend", data: createURL })
             }
-            await SET_ASYNC(`${longUrl}`, JSON.stringify(url))
-            return res.status(201).send({ status: true, message: "successfully shortend", data: createURL })
-        }
-        return res.status(201).send({ status: true, message: "long URL already exists (from db)", data: findURL })
 
-        //caching data : storing data that is frequently asked + requires low latency , in a temporary database (here redis)
+            SET_ASYNC(`${longUrl}`, JSON.stringify(findURL.shortUrl))
+            return res.status(400).send({ status: false, message: "longurl already exists (from db)", data: findURL })
+        }
+
+        //caching data : storing data that is frequently asked + requires low latency + wanna perform high level computation , in a temporary database (here redis)
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
     }
