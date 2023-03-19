@@ -97,36 +97,36 @@ const updateBlog = async function (req, res) {
 
     let { tags, category, subcategory, title, body } = req.body
 
-    // foundDoc.tags = foundDoc.tags.concat(tags)             
-    // foundDoc.subcategory = foundDoc.tags.concat(subcategory);
-    // let result1 = foundDoc.tags.filter((b) => b != null);
-    // let result2 = foundDoc.subcategory.filter((b) => b != null);
+    foundDoc.tags = foundDoc.tags.concat(tags)             
+    foundDoc.subcategory = foundDoc.tags.concat(subcategory);
+    let result1 = foundDoc.tags.filter((b) => b != null);
+    let result2 = foundDoc.subcategory.filter((b) => b != null);
 
     if (foundDoc && foundDoc.isDeleted == false) {
-      // let updatedDoc = await blogModel.findOneAndUpdate(
-      //   { _id: blogId },
-      //   {
-      //     tags: result1,
-      //     category: category,
-      //     subcategory: result2,
-      //     title: title,
-      //     body: body,
-      //     $set: { isPublished: true, publishedAt: Date.now() },
-      //   },
-      //   { new: true }
-      // );
-      
-      let updatedDoc = await blogModel.findByIdAndUpdate(
+      let updatedDoc = await blogModel.findOneAndUpdate(
         { _id: blogId },
         {
-          $push: { tags: tags, subcategory: subcategory },
+          tags: result1,
           category: category,
+          subcategory: result2,
           title: title,
           body: body,
-          $set: { isPublished: true, publishedAt: Date.now() }
+          $set: { isPublished: true, publishedAt: Date.now() },
         },
         { new: true }
-      )
+      );
+      
+//       let updatedDoc = await blogModel.findByIdAndUpdate(
+//         { _id: blogId },
+//         {
+//           $push: { tags: tags, subcategory: subcategory },
+//           category: category,
+//           title: title,
+//           body: body,
+//           $set: { isPublished: true, publishedAt: Date.now() }
+//         },
+//         { new: true }
+//       )
       return res.status(200).send({ status: true, msg: "Blog is succesfully Upadated", data: updatedDoc });
     }
 
